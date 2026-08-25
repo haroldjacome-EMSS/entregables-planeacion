@@ -227,7 +227,7 @@ const LoginScreen = ({ onLogin, employees }) => {
       if (password === user.id) {
         onLogin(user);
       } else {
-        setErrorMsg('Contraseña incorrecta. Recuerde que su contraseña es su número de cédula.');
+        setErrorMsg('Contraseña incorrecta.');
       }
     }
   };
@@ -281,7 +281,7 @@ const LoginScreen = ({ onLogin, employees }) => {
               type="password"
               value={password}
               onChange={(e) => { setPassword(e.target.value); setErrorMsg(''); }}
-              placeholder="Número de cédula"
+              placeholder="••••••••••"
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#165399] outline-none transition-shadow bg-gray-50 text-gray-800 font-medium"
             />
           </div>
@@ -448,12 +448,16 @@ const DashboardMetrics = ({ tasks, employees }) => {
 };
 
 /* --- PANEL DE ADMINISTRACIÓN (SOLO COORDINADOR) --- */
-const AdminPanel = ({ config, onUpdateConfig, tasks }) => {
+const AdminPanel = ({ config, onUpdateConfig, tasks, currentUser, onUpdateTaskData, onDeleteTask, onAddTask }) => {
   const [activeTab, setActiveTab] = useState('USERS');
   const [newUser, setNewUser] = useState({ id: '', name: '', role: 'Junior', reviewerId: '' });
   const [categoriesState, setCategoriesState] = useState(config.categories);
   const [editingUser, setEditingUser] = useState(null);
   const [isEditUserModalOpen, setIsEditUserModalOpen] = useState(false);
+  
+  // Estados para la pestaña de Base de Datos Cruda
+  const [isEditDbModalOpen, setIsEditDbModalOpen] = useState(false);
+  const [editingDbTask, setEditingDbTask] = useState(null);
 
   const handleAddUser = (e) => {
     e.preventDefault();
@@ -502,6 +506,63 @@ const AdminPanel = ({ config, onUpdateConfig, tasks }) => {
     alert("Tiempos de gestión actualizados exitosamente.");
   };
 
+  const handleExportBackup = () => {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(tasks));
+    const dlAnchorElem = document.createElement('a');
+    dlAnchorElem.setAttribute("href", dataStr);
+    dlAnchorElem.setAttribute("download", `Backup_Entregables_EMSSANAR_${new Date().toISOString().split('T')[0]}.json`);
+    document.body.appendChild(dlAnchorElem);
+    dlAnchorElem.click();
+    document.body.removeChild(dlAnchorElem);
+  };
+
+  const handleImportBackup = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const importedTasks = JSON.parse(event.target.result);
+        if (Array.isArray(importedTasks)) {
+          if (window.confirm(`Se encontraron ${importedTasks.length} entregables en el archivo. ¿Desea importarlos a la base de datos?`)) {
+            for (const task of importedTasks) {
+              await onAddTask(task);
+            }
+            alert("Backup importado exitosamente.");
+          }
+        } else {
+          alert("El archivo no tiene un formato de backup válido.");
+        }
+      } catch(error) {
+        alert("Error al leer el archivo de backup.");
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = null; // Resetea el input para permitir cargar el mismo archivo varias veces si es necesario
+  };
+
+  const handleDeleteAllTasks = async () => {
+    const confirm1 = window.confirm("¡ADVERTENCIA CRÍTICA!\n\n¿Está absolutamente seguro de que desea ELIMINAR TODOS LOS ENTREGABLES del sistema? Esta acción borrará el historial completo de todos los profesionales.");
+    if (confirm1) {
+      const confirm2 = window.prompt("Para continuar, escriba la palabra ELIMINAR en mayúsculas:");
+      if (confirm2 === 'ELIMINAR') {
+        for (const task of tasks) {
+          await onDeleteTask(task.id);
+        }
+        alert("Todos los entregables han sido eliminados del sistema.");
+      } else {
+        alert("Operación cancelada. (Texto incorrecto)");
+      }
+    }
+  };
+
+  const handleUpdateDbTask = (e) => {
+    e.preventDefault();
+    onUpdateTaskData(editingDbTask.id, editingDbTask);
+    setIsEditDbModalOpen(false);
+    setEditingDbTask(null);
+  };
+
   const exportToCSV = () => {
     const headers = ['ID Tarea', 'Semana de Ejecución', 'Profesional Asignado', 'Categoría', 'Tipo de Documento', 'Título del Entregable', 'Estado Actual', 'Fecha de Asignación', 'Descripción de Gestión', 'Link de Evidencias'];
     const csvRows = [headers.join(',')];
@@ -528,10 +589,13 @@ const AdminPanel = ({ config, onUpdateConfig, tasks }) => {
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="flex border-b border-gray-200 bg-gray-50">
-          <button onClick={() => setActiveTab('USERS')} className={`px-6 py-4 font-bold text-sm transition-colors ${activeTab === 'USERS' ? 'bg-white border-b-2 border-[#165399] text-[#165399]' : 'text-gray-500 hover:text-gray-800'}`}>Miembros del Equipo</button>
-          <button onClick={() => setActiveTab('CATEGORIES')} className={`px-6 py-4 font-bold text-sm transition-colors ${activeTab === 'CATEGORIES' ? 'bg-white border-b-2 border-[#165399] text-[#165399]' : 'text-gray-500 hover:text-gray-800'}`}>Tiempos de Gestión</button>
-          <button onClick={() => setActiveTab('REPORTS')} className={`px-6 py-4 font-bold text-sm transition-colors ${activeTab === 'REPORTS' ? 'bg-white border-b-2 border-[#165399] text-[#165399]' : 'text-gray-500 hover:text-gray-800'}`}>Exportar Reportes</button>
+        <div className="flex border-b border-gray-200 bg-gray-50 overflow-x-auto">
+          <button onClick={() => setActiveTab('USERS')} className={`px-6 py-4 font-bold text-sm transition-colors whitespace-nowrap ${activeTab === 'USERS' ? 'bg-white border-b-2 border-[#165399] text-[#165399]' : 'text-gray-500 hover:text-gray-800'}`}>Miembros del Equipo</button>
+          <button onClick={() => setActiveTab('CATEGORIES')} className={`px-6 py-4 font-bold text-sm transition-colors whitespace-nowrap ${activeTab === 'CATEGORIES' ? 'bg-white border-b-2 border-[#165399] text-[#165399]' : 'text-gray-500 hover:text-gray-800'}`}>Tiempos de Gestión</button>
+          <button onClick={() => setActiveTab('REPORTS')} className={`px-6 py-4 font-bold text-sm transition-colors whitespace-nowrap ${activeTab === 'REPORTS' ? 'bg-white border-b-2 border-[#165399] text-[#165399]' : 'text-gray-500 hover:text-gray-800'}`}>Exportar Reportes</button>
+          {currentUser?.role === 'Coordinador' && (
+            <button onClick={() => setActiveTab('DATABASE')} className={`px-6 py-4 font-bold text-sm transition-colors whitespace-nowrap ${activeTab === 'DATABASE' ? 'bg-white border-b-2 border-[#165399] text-[#165399]' : 'text-gray-500 hover:text-gray-800'}`}>Base de Datos (Cruda)</button>
+          )}
         </div>
 
         <div className="p-6">
@@ -636,8 +700,111 @@ const AdminPanel = ({ config, onUpdateConfig, tasks }) => {
               </button>
             </div>
           )}
+
+          {activeTab === 'DATABASE' && currentUser?.role === 'Coordinador' && (
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-blue-50 p-4 rounded-xl border border-blue-100">
+                <div>
+                  <h3 className="font-bold text-[#165399]">Gestión de Base de Datos ({tasks.length} registros)</h3>
+                  <p className="text-xs text-gray-600 mt-1">Módulo exclusivo para Coordinación. Permite la administración directa y forzada de los registros.</p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <button onClick={handleExportBackup} className="bg-white border border-[#165399] text-[#165399] hover:bg-blue-100 font-bold py-2 px-3 rounded text-xs transition-colors flex items-center gap-1 shadow-sm">
+                    <Icon name="download" className="w-3 h-3" /> Backup (JSON)
+                  </button>
+                  <label className="bg-[#8CC63F] hover:bg-[#78b030] text-white font-bold py-2 px-3 rounded text-xs transition-colors cursor-pointer flex items-center gap-1 shadow-sm">
+                    <Icon name="plus" className="w-3 h-3" /> Restaurar Backup
+                    <input type="file" accept=".json" className="hidden" onChange={handleImportBackup} />
+                  </label>
+                  <button onClick={handleDeleteAllTasks} className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded text-xs transition-colors flex items-center gap-1 shadow-sm">
+                    <Icon name="trash" className="w-3 h-3" /> Limpiar Todo
+                  </button>
+                </div>
+              </div>
+
+              <div className="border border-gray-200 rounded-lg overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">ID</th>
+                      <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Título</th>
+                      <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Asignado a</th>
+                      <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Semana</th>
+                      <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Estado</th>
+                      <th className="px-4 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {tasks.map(task => (
+                      <tr key={task.id} className="hover:bg-gray-50">
+                        <td className="px-4 py-3 whitespace-nowrap text-[10px] text-gray-500" title={task.id}>{task.id.slice(-6)}</td>
+                        <td className="px-4 py-3 text-xs font-medium text-gray-900 max-w-[200px] truncate" title={task.title}>{task.title}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-xs text-gray-700">{getAssigneeName(task.assigneeId, config.employees)}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-xs text-gray-700">{task.assignedWeek.split(' ')[0]}</td>
+                        <td className="px-4 py-3 whitespace-nowrap"><Badge status={task.status} /></td>
+                        <td className="px-4 py-3 whitespace-nowrap text-right text-xs font-medium">
+                          <button onClick={() => { setEditingDbTask(task); setIsEditDbModalOpen(true); }} className="text-[#165399] hover:text-[#114078] bg-blue-50 p-1.5 rounded-md mr-2" title="Forzar Edición (DB)"><Icon name="edit" className="w-3.5 h-3.5" /></button>
+                          <button onClick={() => { if(window.confirm('¿Borrar definitivamente este entregable de la base de datos?')) onDeleteTask(task.id); }} className="text-red-600 hover:text-red-900 bg-red-50 p-1.5 rounded-md" title="Eliminar Registro (DB)"><Icon name="trash" className="w-3.5 h-3.5" /></button>
+                        </td>
+                      </tr>
+                    ))}
+                    {tasks.length === 0 && (
+                      <tr><td colSpan="6" className="px-4 py-8 text-center text-sm text-gray-500 italic">No hay registros en la base de datos.</td></tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
       </div>
+
+      <Modal isOpen={isEditDbModalOpen} onClose={() => setIsEditDbModalOpen(false)} title="Edición Cruda de Entregable (Admin)">
+        {editingDbTask && (
+          <form onSubmit={handleUpdateDbTask} className="space-y-4">
+            <div className="bg-yellow-50 text-yellow-800 p-3 rounded-lg text-xs font-bold border border-yellow-200">
+              ADVERTENCIA: Está realizando cambios forzados directamente en la base de datos.
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-[#165399] mb-1">Título del Entregable</label>
+              <input required type="text" value={editingDbTask.title} onChange={e => setEditingDbTask({...editingDbTask, title: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#165399] outline-none" />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-bold text-[#165399] mb-1">Asignado a</label>
+                <select required value={editingDbTask.assigneeId} onChange={e => setEditingDbTask({...editingDbTask, assigneeId: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#165399] outline-none text-sm">
+                  {config.employees.map(emp => <option key={emp.id} value={emp.id}>{emp.name}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-[#165399] mb-1">Estado Fuerte</label>
+                <select required value={editingDbTask.status} onChange={e => setEditingDbTask({...editingDbTask, status: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#165399] outline-none text-sm">
+                  {Object.values(STATUS).map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+               <div>
+                  <label className="block text-sm font-bold text-[#165399] mb-1">Semana Asignada</label>
+                  <input required type="text" value={editingDbTask.assignedWeek} onChange={e => setEditingDbTask({...editingDbTask, assignedWeek: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#165399] outline-none text-sm" />
+               </div>
+               <div>
+                  <label className="block text-sm font-bold text-[#165399] mb-1">Enlace (URL Soportes)</label>
+                  <input type="text" value={editingDbTask.evidenceLink || ''} onChange={e => setEditingDbTask({...editingDbTask, evidenceLink: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#165399] outline-none text-sm" />
+               </div>
+            </div>
+            <div>
+               <label className="block text-sm font-bold text-[#165399] mb-1">Descripción de Gestión</label>
+               <textarea rows="3" value={editingDbTask.managementDescription || ''} onChange={e => setEditingDbTask({...editingDbTask, managementDescription: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#165399] outline-none text-sm"></textarea>
+            </div>
+            
+            <div className="pt-4 border-t border-gray-200 flex justify-end gap-2">
+              <button type="button" onClick={() => setIsEditDbModalOpen(false)} className="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg font-bold transition-colors">Cancelar</button>
+              <button type="submit" className="px-4 py-2 bg-[#165399] text-white rounded-lg hover:bg-[#114078] font-bold transition-colors shadow-sm">Guardar y Forzar Cambios</button>
+            </div>
+          </form>
+        )}
+      </Modal>
 
       <Modal isOpen={isEditUserModalOpen} onClose={() => setIsEditUserModalOpen(false)} title="Editar Miembro del Equipo">
         {editingUser && (
@@ -1667,7 +1834,7 @@ const App = () => {
 
       <main className="max-w-7xl mx-auto px-4 py-8">
         {dashboardMode === 'ADMIN' ? (
-          <AdminPanel config={appConfig} onUpdateConfig={handleUpdateConfig} tasks={tasks} />
+          <AdminPanel config={appConfig} onUpdateConfig={handleUpdateConfig} tasks={tasks} currentUser={currentUser} onUpdateTaskData={handleUpdateTaskData} onDeleteTask={handleDeleteTask} onAddTask={handleAddTask} />
         ) : (
           <>
             <div className="mb-6 flex gap-4">
