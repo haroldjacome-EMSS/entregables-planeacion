@@ -63,12 +63,11 @@ const STATUS_HEX_COLORS = {
   [STATUS.SOLICITUD_CONTINUIDAD]: '#9333EA',
   [STATUS.CUMPLIDO]: '#8CC63F',
   [STATUS.CON_OBSERVACIONES]: '#EAB308',
-  [STATUS.NO_CUMPLIDO]: '#991B1B', 
+  [STATUS.NO_CUMPLIDO]: '#E7000b', 
   [STATUS.CONTINUADO]: '#F97316',
   [STATUS.NO_REPORTADO]: '#DC2626',
 };
 
-// Datos por defecto en caso de que la DB esté vacía
 const DEFAULT_CATEGORIES = [
   { 
     id: 1, 
@@ -147,7 +146,6 @@ const getNextWeekData = (weekString) => {
 const getUpcomingWeeksList = () => {
   const weeks = [];
   const now = new Date();
-  // Generar lista desde hace 4 semanas hasta 12 semanas en el futuro
   for (let i = -4; i < 12; i++) {
     const d = new Date(now.getTime() + i * 7 * 86400000);
     weeks.push(getWeekData(d));
@@ -183,6 +181,7 @@ const Icon = ({ name, className }) => {
     pie: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>,
     alert: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>,
     download: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>,
+    upload: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>,
     settings: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>,
     trash: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
   };
@@ -227,7 +226,7 @@ const LoginScreen = ({ onLogin, employees }) => {
       if (password === user.id) {
         onLogin(user);
       } else {
-        setErrorMsg('Contraseña incorrecta.');
+        setErrorMsg('Contraseña incorrecta. Recuerde que su contraseña es su número de cédula.');
       }
     }
   };
@@ -281,7 +280,7 @@ const LoginScreen = ({ onLogin, employees }) => {
               type="password"
               value={password}
               onChange={(e) => { setPassword(e.target.value); setErrorMsg(''); }}
-              placeholder="••••••••••"
+              placeholder="Número de cédula"
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#165399] outline-none transition-shadow bg-gray-50 text-gray-800 font-medium"
             />
           </div>
@@ -308,39 +307,46 @@ const LoginScreen = ({ onLogin, employees }) => {
 /* --- MÓDULO DE DASHBOARD / MÉTRICAS --- */
 const DashboardMetrics = ({ tasks, employees }) => {
   const total = tasks.length;
+  
+  // Agrupación estricta en 3 estados
   const cumplidos = tasks.filter(t => t.status === STATUS.CUMPLIDO).length;
-  const enRevision = tasks.filter(t => t.status === STATUS.EN_REVISION || t.status === STATUS.SOLICITUD_CONTINUIDAD).length;
-  const pendientes = tasks.filter(t => [STATUS.ASIGNADO, STATUS.EN_PROGRESO, STATUS.CON_OBSERVACIONES, STATUS.CONTINUADO, STATUS.NO_REPORTADO, STATUS.NO_CUMPLIDO].includes(t.status)).length;
+  const noCumplidos = tasks.filter(t => t.status === STATUS.NO_CUMPLIDO || t.status === STATUS.NO_REPORTADO).length;
+  const enRevisionYOtros = total - cumplidos - noCumplidos;
 
-  const statusCounts = tasks.reduce((acc, task) => {
-    acc[task.status] = (acc[task.status] || 0) + 1;
-    return acc;
-  }, {});
+  // Agrupación de 3 estados para la gráfica circular (PieChart)
+  const groupedStatusCounts = {
+    'Cumplidos': cumplidos,
+    'En Revisión / Pendientes': enRevisionYOtros,
+    'No Cumplido': noCumplidos
+  };
 
-  const pieData = Object.keys(statusCounts).map(key => ({
-    name: key,
-    value: statusCounts[key],
-    fill: STATUS_HEX_COLORS[key]
-  }));
+  const pieData = [
+    { name: 'Cumplidos', value: groupedStatusCounts['Cumplidos'], fill: STATUS_HEX_COLORS[STATUS.CUMPLIDO] },
+    { name: 'En Revisión / Pendientes', value: groupedStatusCounts['En Revisión / Pendientes'], fill: STATUS_HEX_COLORS[STATUS.EN_REVISION] },
+    { name: 'No Cumplido', value: groupedStatusCounts['No Cumplido'], fill: STATUS_HEX_COLORS[STATUS.NO_CUMPLIDO] }
+  ].filter(item => item.value > 0);
 
+  // Agrupación de 3 estados para la gráfica de barras (BarChart)
   const assigneeStats = tasks.reduce((acc, task) => {
     const name = getAssigneeName(task.assigneeId, employees).split(' ')[0];
     if (!acc[name]) {
       acc[name] = { 
         profesional: name, 
-        [STATUS.CUMPLIDO]: 0, 
-        [STATUS.EN_REVISION]: 0, 
-        [STATUS.SOLICITUD_CONTINUIDAD]: 0,
-        [STATUS.EN_PROGRESO]: 0,
-        [STATUS.CON_OBSERVACIONES]: 0,
-        [STATUS.NO_CUMPLIDO]: 0,
-        [STATUS.CONTINUADO]: 0,
-        [STATUS.ASIGNADO]: 0,
-        [STATUS.NO_REPORTADO]: 0,
+        'Cumplido': 0, 
+        'En Revisión': 0, 
+        'No Cumplido': 0,
         total: 0 
       };
     }
-    acc[name][task.status] += 1;
+    
+    if (task.status === STATUS.CUMPLIDO) {
+      acc[name]['Cumplido'] += 1;
+    } else if (task.status === STATUS.NO_CUMPLIDO || task.status === STATUS.NO_REPORTADO) {
+      acc[name]['No Cumplido'] += 1;
+    } else {
+      acc[name]['En Revisión'] += 1;
+    }
+    
     acc[name].total += 1;
     return acc;
   }, {});
@@ -362,25 +368,32 @@ const DashboardMetrics = ({ tasks, employees }) => {
   return (
     <div className="mb-6 space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {/* Total */}
         <div className="bg-[#165399] p-4 rounded-xl shadow-sm flex flex-col items-center justify-center text-white relative overflow-hidden">
           <div className="absolute opacity-10 right-[-10px] top-[-10px]"><Icon name="pie" className="w-24 h-24" /></div>
           <span className="text-4xl font-black relative z-10">{total}</span>
           <span className="text-[10px] font-bold uppercase mt-1 text-center opacity-90 relative z-10 tracking-widest">Total Entregables</span>
         </div>
+        
+        {/* Cumplidos */}
         <div className="bg-[#8CC63F] p-4 rounded-xl shadow-sm flex flex-col items-center justify-center text-white relative overflow-hidden">
           <div className="absolute opacity-20 right-[-10px] top-[-10px]"><Icon name="check" className="w-24 h-24" /></div>
           <span className="text-4xl font-black relative z-10">{cumplidos}</span>
-          <span className="text-[10px] font-bold uppercase mt-1 text-center opacity-90 relative z-10 tracking-widest">Aprobados (Cumplidos)</span>
+          <span className="text-[10px] font-bold uppercase mt-1 text-center opacity-90 relative z-10 tracking-widest">Cumplidos</span>
         </div>
+        
+        {/* En Revisión / Pendientes */}
         <div className="bg-[#AAB4C2] p-4 rounded-xl shadow-sm flex flex-col items-center justify-center text-white relative overflow-hidden">
            <div className="absolute opacity-20 right-[-10px] top-[-10px]"><Icon name="clock" className="w-24 h-24" /></div>
-          <span className="text-4xl font-black relative z-10">{enRevision}</span>
-          <span className="text-[10px] font-bold uppercase mt-1 text-center opacity-90 relative z-10 tracking-widest">En Revisión</span>
+          <span className="text-4xl font-black relative z-10">{enRevisionYOtros}</span>
+          <span className="text-[10px] font-bold uppercase mt-1 text-center opacity-90 relative z-10 tracking-widest">En Revisión / Pendientes</span>
         </div>
-        <div className="bg-orange-500 p-4 rounded-xl shadow-sm flex flex-col items-center justify-center text-white relative overflow-hidden">
+        
+        {/* No Cumplidos */}
+        <div className="bg-red-600 p-4 rounded-xl shadow-sm flex flex-col items-center justify-center text-white relative overflow-hidden">
            <div className="absolute opacity-20 right-[-10px] top-[-10px]"><Icon name="alert" className="w-24 h-24" /></div>
-          <span className="text-4xl font-black relative z-10">{pendientes}</span>
-          <span className="text-[10px] font-bold uppercase mt-1 text-center opacity-90 relative z-10 tracking-widest">Pendientes / Ajustes</span>
+          <span className="text-4xl font-black relative z-10">{noCumplidos}</span>
+          <span className="text-[10px] font-bold uppercase mt-1 text-center opacity-90 relative z-10 tracking-widest">No Cumplidos</span>
         </div>
       </div>
 
@@ -411,32 +424,14 @@ const DashboardMetrics = ({ tasks, employees }) => {
                 <RechartsTooltip />
                 <Legend verticalAlign="bottom" height={40} wrapperStyle={{fontSize: '11px'}}/>
                 
-                <Bar dataKey={STATUS.CUMPLIDO} name="Cumplidos" stackId="a" fill={STATUS_HEX_COLORS[STATUS.CUMPLIDO]}>
-                  <LabelList dataKey={STATUS.CUMPLIDO} position="center" fill="white" fontSize={11} fontWeight="bold" formatter={v => v > 0 ? v : ''} />
+                <Bar dataKey="Cumplido" name="Cumplidos" stackId="a" fill={STATUS_HEX_COLORS[STATUS.CUMPLIDO]}>
+                  <LabelList dataKey="Cumplido" position="center" fill="white" fontSize={11} fontWeight="bold" formatter={v => v > 0 ? v : ''} />
                 </Bar>
-                <Bar dataKey={STATUS.EN_REVISION} name="En Revisión" stackId="a" fill={STATUS_HEX_COLORS[STATUS.EN_REVISION]}>
-                  <LabelList dataKey={STATUS.EN_REVISION} position="center" fill="white" fontSize={11} fontWeight="bold" formatter={v => v > 0 ? v : ''} />
+                <Bar dataKey="En Revisión" name="En Revisión / Pendientes" stackId="a" fill={STATUS_HEX_COLORS[STATUS.EN_REVISION]}>
+                  <LabelList dataKey="En Revisión" position="center" fill="white" fontSize={11} fontWeight="bold" formatter={v => v > 0 ? v : ''} />
                 </Bar>
-                <Bar dataKey={STATUS.SOLICITUD_CONTINUIDAD} name="Solicita Cont." stackId="a" fill={STATUS_HEX_COLORS[STATUS.SOLICITUD_CONTINUIDAD]}>
-                  <LabelList dataKey={STATUS.SOLICITUD_CONTINUIDAD} position="center" fill="white" fontSize={11} fontWeight="bold" formatter={v => v > 0 ? v : ''} />
-                </Bar>
-                <Bar dataKey={STATUS.EN_PROGRESO} name="En Progreso" stackId="a" fill={STATUS_HEX_COLORS[STATUS.EN_PROGRESO]}>
-                  <LabelList dataKey={STATUS.EN_PROGRESO} position="center" fill="white" fontSize={11} fontWeight="bold" formatter={v => v > 0 ? v : ''} />
-                </Bar>
-                <Bar dataKey={STATUS.CON_OBSERVACIONES} name="Ajustes" stackId="a" fill={STATUS_HEX_COLORS[STATUS.CON_OBSERVACIONES]}>
-                  <LabelList dataKey={STATUS.CON_OBSERVACIONES} position="center" fill="white" fontSize={11} fontWeight="bold" formatter={v => v > 0 ? v : ''} />
-                </Bar>
-                <Bar dataKey={STATUS.NO_CUMPLIDO} name="No Cumplido" stackId="a" fill={STATUS_HEX_COLORS[STATUS.NO_CUMPLIDO]}>
-                  <LabelList dataKey={STATUS.NO_CUMPLIDO} position="center" fill="white" fontSize={11} fontWeight="bold" formatter={v => v > 0 ? v : ''} />
-                </Bar>
-                <Bar dataKey={STATUS.CONTINUADO} name="Continuado" stackId="a" fill={STATUS_HEX_COLORS[STATUS.CONTINUADO]}>
-                  <LabelList dataKey={STATUS.CONTINUADO} position="center" fill="white" fontSize={11} fontWeight="bold" formatter={v => v > 0 ? v : ''} />
-                </Bar>
-                <Bar dataKey={STATUS.ASIGNADO} name="Asignado" stackId="a" fill={STATUS_HEX_COLORS[STATUS.ASIGNADO]}>
-                  <LabelList dataKey={STATUS.ASIGNADO} position="center" fill="white" fontSize={11} fontWeight="bold" formatter={v => v > 0 ? v : ''} />
-                </Bar>
-                <Bar dataKey={STATUS.NO_REPORTADO} name="No Reportado" stackId="a" fill={STATUS_HEX_COLORS[STATUS.NO_REPORTADO]}>
-                  <LabelList dataKey={STATUS.NO_REPORTADO} position="center" fill="white" fontSize={11} fontWeight="bold" formatter={v => v > 0 ? v : ''} />
+                <Bar dataKey="No Cumplido" name="No Cumplido" stackId="a" fill={STATUS_HEX_COLORS[STATUS.NO_CUMPLIDO]}>
+                  <LabelList dataKey="No Cumplido" position="center" fill="white" fontSize={11} fontWeight="bold" formatter={v => v > 0 ? v : ''} />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
@@ -447,17 +442,17 @@ const DashboardMetrics = ({ tasks, employees }) => {
   );
 };
 
-/* --- PANEL DE ADMINISTRACIÓN (SOLO COORDINADOR) --- */
-const AdminPanel = ({ config, onUpdateConfig, tasks, currentUser, onUpdateTaskData, onDeleteTask, onAddTask }) => {
+/* --- PANEL DE ADMINISTRACIÓN --- */
+const AdminPanel = ({ config, onUpdateConfig, tasks, currentUser, onUpdateTaskData, onDeleteTask, onImportTasks, onClearAllTasks }) => {
   const [activeTab, setActiveTab] = useState('USERS');
   const [newUser, setNewUser] = useState({ id: '', name: '', role: 'Junior', reviewerId: '' });
   const [categoriesState, setCategoriesState] = useState(config.categories);
   const [editingUser, setEditingUser] = useState(null);
   const [isEditUserModalOpen, setIsEditUserModalOpen] = useState(false);
-  
-  // Estados para la pestaña de Base de Datos Cruda
-  const [isEditDbModalOpen, setIsEditDbModalOpen] = useState(false);
-  const [editingDbTask, setEditingDbTask] = useState(null);
+
+  // Estados BD Cruda
+  const [editDbModal, setEditDbModal] = useState(false);
+  const [dbTaskEdit, setDbTaskEdit] = useState(null);
 
   const handleAddUser = (e) => {
     e.preventDefault();
@@ -506,63 +501,6 @@ const AdminPanel = ({ config, onUpdateConfig, tasks, currentUser, onUpdateTaskDa
     alert("Tiempos de gestión actualizados exitosamente.");
   };
 
-  const handleExportBackup = () => {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(tasks));
-    const dlAnchorElem = document.createElement('a');
-    dlAnchorElem.setAttribute("href", dataStr);
-    dlAnchorElem.setAttribute("download", `Backup_Entregables_EMSSANAR_${new Date().toISOString().split('T')[0]}.json`);
-    document.body.appendChild(dlAnchorElem);
-    dlAnchorElem.click();
-    document.body.removeChild(dlAnchorElem);
-  };
-
-  const handleImportBackup = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-      try {
-        const importedTasks = JSON.parse(event.target.result);
-        if (Array.isArray(importedTasks)) {
-          if (window.confirm(`Se encontraron ${importedTasks.length} entregables en el archivo. ¿Desea importarlos a la base de datos?`)) {
-            for (const task of importedTasks) {
-              await onAddTask(task);
-            }
-            alert("Backup importado exitosamente.");
-          }
-        } else {
-          alert("El archivo no tiene un formato de backup válido.");
-        }
-      } catch(error) {
-        alert("Error al leer el archivo de backup.");
-      }
-    };
-    reader.readAsText(file);
-    e.target.value = null; // Resetea el input para permitir cargar el mismo archivo varias veces si es necesario
-  };
-
-  const handleDeleteAllTasks = async () => {
-    const confirm1 = window.confirm("¡ADVERTENCIA CRÍTICA!\n\n¿Está absolutamente seguro de que desea ELIMINAR TODOS LOS ENTREGABLES del sistema? Esta acción borrará el historial completo de todos los profesionales.");
-    if (confirm1) {
-      const confirm2 = window.prompt("Para continuar, escriba la palabra ELIMINAR en mayúsculas:");
-      if (confirm2 === 'ELIMINAR') {
-        for (const task of tasks) {
-          await onDeleteTask(task.id);
-        }
-        alert("Todos los entregables han sido eliminados del sistema.");
-      } else {
-        alert("Operación cancelada. (Texto incorrecto)");
-      }
-    }
-  };
-
-  const handleUpdateDbTask = (e) => {
-    e.preventDefault();
-    onUpdateTaskData(editingDbTask.id, editingDbTask);
-    setIsEditDbModalOpen(false);
-    setEditingDbTask(null);
-  };
-
   const exportToCSV = () => {
     const headers = ['ID Tarea', 'Semana de Ejecución', 'Profesional Asignado', 'Categoría', 'Tipo de Documento', 'Título del Entregable', 'Estado Actual', 'Fecha de Asignación', 'Descripción de Gestión', 'Link de Evidencias'];
     const csvRows = [headers.join(',')];
@@ -586,15 +524,56 @@ const AdminPanel = ({ config, onUpdateConfig, tasks, currentUser, onUpdateTaskDa
     document.body.removeChild(link);
   };
 
+  // Funciones BD Cruda
+  const exportToJSON = () => {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(tasks));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", `Backup_Entregables_Crudo_${new Date().toLocaleDateString().replace(/\//g, '-')}.json`);
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+  };
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const json = JSON.parse(event.target.result);
+        if (Array.isArray(json)) {
+          if(window.confirm(`Se encontraron ${json.length} registros. ¿Desea importarlos a la base de datos?`)) {
+            onImportTasks(json);
+            alert(`Se inició la importación de ${json.length} registros.`);
+          }
+        } else {
+          alert("El archivo no tiene el formato correcto (debe ser un array JSON).");
+        }
+      } catch (err) {
+        alert("Error al leer el archivo. Asegúrese de que sea un JSON válido.");
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = null; // reset
+  };
+
+  const saveDbTaskEdit = (e) => {
+    e.preventDefault();
+    onUpdateTaskData(dbTaskEdit.id, dbTaskEdit);
+    setEditDbModal(false);
+    setDbTaskEdit(null);
+  };
+
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="flex border-b border-gray-200 bg-gray-50 overflow-x-auto">
-          <button onClick={() => setActiveTab('USERS')} className={`px-6 py-4 font-bold text-sm transition-colors whitespace-nowrap ${activeTab === 'USERS' ? 'bg-white border-b-2 border-[#165399] text-[#165399]' : 'text-gray-500 hover:text-gray-800'}`}>Miembros del Equipo</button>
-          <button onClick={() => setActiveTab('CATEGORIES')} className={`px-6 py-4 font-bold text-sm transition-colors whitespace-nowrap ${activeTab === 'CATEGORIES' ? 'bg-white border-b-2 border-[#165399] text-[#165399]' : 'text-gray-500 hover:text-gray-800'}`}>Tiempos de Gestión</button>
-          <button onClick={() => setActiveTab('REPORTS')} className={`px-6 py-4 font-bold text-sm transition-colors whitespace-nowrap ${activeTab === 'REPORTS' ? 'bg-white border-b-2 border-[#165399] text-[#165399]' : 'text-gray-500 hover:text-gray-800'}`}>Exportar Reportes</button>
-          {currentUser?.role === 'Coordinador' && (
-            <button onClick={() => setActiveTab('DATABASE')} className={`px-6 py-4 font-bold text-sm transition-colors whitespace-nowrap ${activeTab === 'DATABASE' ? 'bg-white border-b-2 border-[#165399] text-[#165399]' : 'text-gray-500 hover:text-gray-800'}`}>Base de Datos (Cruda)</button>
+        <div className="flex border-b border-gray-200 bg-gray-50 flex-wrap">
+          <button onClick={() => setActiveTab('USERS')} className={`px-6 py-4 font-bold text-sm transition-colors ${activeTab === 'USERS' ? 'bg-white border-b-2 border-[#165399] text-[#165399]' : 'text-gray-500 hover:text-gray-800'}`}>Miembros del Equipo</button>
+          <button onClick={() => setActiveTab('CATEGORIES')} className={`px-6 py-4 font-bold text-sm transition-colors ${activeTab === 'CATEGORIES' ? 'bg-white border-b-2 border-[#165399] text-[#165399]' : 'text-gray-500 hover:text-gray-800'}`}>Tiempos de Gestión</button>
+          <button onClick={() => setActiveTab('REPORTS')} className={`px-6 py-4 font-bold text-sm transition-colors ${activeTab === 'REPORTS' ? 'bg-white border-b-2 border-[#165399] text-[#165399]' : 'text-gray-500 hover:text-gray-800'}`}>Exportar Reportes</button>
+          {currentUser.role === 'Coordinador' && (
+            <button onClick={() => setActiveTab('DATABASE')} className={`px-6 py-4 font-bold text-sm transition-colors ${activeTab === 'DATABASE' ? 'bg-white border-b-2 border-orange-500 text-orange-600' : 'text-gray-500 hover:text-gray-800'}`}>Base de Datos (Cruda)</button>
           )}
         </div>
 
@@ -693,119 +672,80 @@ const AdminPanel = ({ config, onUpdateConfig, tasks, currentUser, onUpdateTaskDa
           {activeTab === 'REPORTS' && (
             <div className="flex flex-col items-center justify-center p-10 bg-gray-50 rounded-xl border border-gray-200 border-dashed">
               <Icon name="download" className="w-16 h-16 text-[#8CC63F] mb-4" />
-              <h3 className="text-lg font-bold text-[#165399] mb-2">Exportar Base de Datos</h3>
-              <p className="text-sm text-gray-500 mb-6 text-center max-w-md">Descargue todos los registros almacenados en el sistema en formato CSV para procesarlos en Excel o Google Sheets.</p>
+              <h3 className="text-lg font-bold text-[#165399] mb-2">Exportar Reportes</h3>
+              <p className="text-sm text-gray-500 mb-6 text-center max-w-md">Descargue un reporte de gestión en formato CSV para procesarlo visualmente en Excel.</p>
               <button onClick={exportToCSV} className="bg-[#8CC63F] hover:bg-[#78b030] text-white font-bold py-3 px-8 rounded-lg shadow-md transition-colors flex items-center gap-2">
                 Descargar Reporte General
               </button>
             </div>
           )}
 
-          {activeTab === 'DATABASE' && currentUser?.role === 'Coordinador' && (
-            <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-blue-50 p-4 rounded-xl border border-blue-100">
-                <div>
-                  <h3 className="font-bold text-[#165399]">Gestión de Base de Datos ({tasks.length} registros)</h3>
-                  <p className="text-xs text-gray-600 mt-1">Módulo exclusivo para Coordinación. Permite la administración directa y forzada de los registros.</p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <button onClick={handleExportBackup} className="bg-white border border-[#165399] text-[#165399] hover:bg-blue-100 font-bold py-2 px-3 rounded text-xs transition-colors flex items-center gap-1 shadow-sm">
-                    <Icon name="download" className="w-3 h-3" /> Backup (JSON)
+          {activeTab === 'DATABASE' && currentUser.role === 'Coordinador' && (
+            <div className="space-y-4">
+              <div className="flex flex-col md:flex-row gap-3 mb-4 bg-gray-50 p-4 rounded-lg border border-gray-200 items-center justify-between">
+                <div className="flex gap-2">
+                  <button onClick={exportToJSON} className="bg-[#165399] hover:bg-[#114078] text-white px-4 py-2 rounded-lg font-bold text-sm shadow-sm flex items-center gap-1">
+                    <Icon name="download" className="w-4 h-4"/> Backup (Exportar JSON)
                   </button>
-                  <label className="bg-[#8CC63F] hover:bg-[#78b030] text-white font-bold py-2 px-3 rounded text-xs transition-colors cursor-pointer flex items-center gap-1 shadow-sm">
-                    <Icon name="plus" className="w-3 h-3" /> Restaurar Backup
-                    <input type="file" accept=".json" className="hidden" onChange={handleImportBackup} />
+                  <label className="bg-[#8CC63F] hover:bg-[#78b030] text-white px-4 py-2 rounded-lg font-bold text-sm shadow-sm cursor-pointer flex items-center gap-1">
+                    <Icon name="upload" className="w-4 h-4"/> Restaurar (Importar JSON)
+                    <input type="file" accept=".json" onChange={handleFileUpload} className="hidden" />
                   </label>
-                  <button onClick={handleDeleteAllTasks} className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded text-xs transition-colors flex items-center gap-1 shadow-sm">
-                    <Icon name="trash" className="w-3 h-3" /> Limpiar Todo
-                  </button>
                 </div>
+                <button 
+                  onClick={() => {
+                    if(window.confirm('🚨 ¡PELIGRO! ¿Está absolutamente seguro de querer ELIMINAR TODOS los entregables de la base de datos? Esta acción es destructiva y no se puede deshacer.')) {
+                      onClearAllTasks();
+                    }
+                  }} 
+                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-bold text-sm shadow-sm flex items-center gap-1"
+                >
+                  <Icon name="trash" className="w-4 h-4"/> Vaciar Base de Datos Completa
+                </button>
               </div>
 
-              <div className="border border-gray-200 rounded-lg overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+              <div className="overflow-x-auto border border-gray-200 rounded-lg max-h-[500px]">
+                <table className="min-w-full divide-y divide-gray-200 relative">
+                  <thead className="bg-gray-100 sticky top-0 z-10 shadow-sm">
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">ID</th>
-                      <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Título</th>
-                      <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Asignado a</th>
-                      <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Semana</th>
-                      <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Estado</th>
-                      <th className="px-4 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Acciones</th>
+                      <th className="px-4 py-3 text-left text-[10px] font-black text-gray-500 uppercase tracking-wider">ID / Fecha</th>
+                      <th className="px-4 py-3 text-left text-[10px] font-black text-gray-500 uppercase tracking-wider">Título del Entregable</th>
+                      <th className="px-4 py-3 text-left text-[10px] font-black text-gray-500 uppercase tracking-wider">Profesional (Cédula)</th>
+                      <th className="px-4 py-3 text-left text-[10px] font-black text-gray-500 uppercase tracking-wider">Semana</th>
+                      <th className="px-4 py-3 text-left text-[10px] font-black text-gray-500 uppercase tracking-wider">Estado</th>
+                      <th className="px-4 py-3 text-right text-[10px] font-black text-gray-500 uppercase tracking-wider">Acción Cruda</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {tasks.map(task => (
-                      <tr key={task.id} className="hover:bg-gray-50">
-                        <td className="px-4 py-3 whitespace-nowrap text-[10px] text-gray-500" title={task.id}>{task.id.slice(-6)}</td>
-                        <td className="px-4 py-3 text-xs font-medium text-gray-900 max-w-[200px] truncate" title={task.title}>{task.title}</td>
-                        <td className="px-4 py-3 whitespace-nowrap text-xs text-gray-700">{getAssigneeName(task.assigneeId, config.employees)}</td>
-                        <td className="px-4 py-3 whitespace-nowrap text-xs text-gray-700">{task.assignedWeek.split(' ')[0]}</td>
-                        <td className="px-4 py-3 whitespace-nowrap"><Badge status={task.status} /></td>
-                        <td className="px-4 py-3 whitespace-nowrap text-right text-xs font-medium">
-                          <button onClick={() => { setEditingDbTask(task); setIsEditDbModalOpen(true); }} className="text-[#165399] hover:text-[#114078] bg-blue-50 p-1.5 rounded-md mr-2" title="Forzar Edición (DB)"><Icon name="edit" className="w-3.5 h-3.5" /></button>
-                          <button onClick={() => { if(window.confirm('¿Borrar definitivamente este entregable de la base de datos?')) onDeleteTask(task.id); }} className="text-red-600 hover:text-red-900 bg-red-50 p-1.5 rounded-md" title="Eliminar Registro (DB)"><Icon name="trash" className="w-3.5 h-3.5" /></button>
+                      <tr key={task.id} className="hover:bg-orange-50 transition-colors">
+                        <td className="px-4 py-2 whitespace-nowrap text-xs text-gray-500">
+                          <span className="font-mono text-[9px] block text-gray-400">{task.id}</span>
+                          {task.createdAt}
+                        </td>
+                        <td className="px-4 py-2 text-xs font-bold text-gray-900 max-w-xs truncate" title={task.title}>{task.title}</td>
+                        <td className="px-4 py-2 whitespace-nowrap text-xs text-gray-700">{task.assigneeId}</td>
+                        <td className="px-4 py-2 whitespace-nowrap text-xs text-gray-700">{task.assignedWeek}</td>
+                        <td className="px-4 py-2 whitespace-nowrap"><Badge status={task.status} /></td>
+                        <td className="px-4 py-2 whitespace-nowrap text-right text-xs font-medium">
+                          <button onClick={() => { setDbTaskEdit(task); setEditDbModal(true); }} className="text-[#165399] hover:text-[#114078] bg-blue-50 p-1.5 rounded mr-2" title="Edición Cruda"><Icon name="edit" className="w-4 h-4" /></button>
+                          <button onClick={() => { if(window.confirm('¿Borrar registro de la base de datos?')) onDeleteTask(task.id); }} className="text-red-600 hover:text-red-900 bg-red-50 p-1.5 rounded" title="Forzar Eliminado"><Icon name="trash" className="w-4 h-4" /></button>
                         </td>
                       </tr>
                     ))}
                     {tasks.length === 0 && (
-                      <tr><td colSpan="6" className="px-4 py-8 text-center text-sm text-gray-500 italic">No hay registros en la base de datos.</td></tr>
+                      <tr><td colSpan="6" className="text-center py-8 text-sm text-gray-500 font-bold">La base de datos está vacía.</td></tr>
                     )}
                   </tbody>
                 </table>
               </div>
             </div>
           )}
+
         </div>
       </div>
 
-      <Modal isOpen={isEditDbModalOpen} onClose={() => setIsEditDbModalOpen(false)} title="Edición Cruda de Entregable (Admin)">
-        {editingDbTask && (
-          <form onSubmit={handleUpdateDbTask} className="space-y-4">
-            <div className="bg-yellow-50 text-yellow-800 p-3 rounded-lg text-xs font-bold border border-yellow-200">
-              ADVERTENCIA: Está realizando cambios forzados directamente en la base de datos.
-            </div>
-            <div>
-              <label className="block text-sm font-bold text-[#165399] mb-1">Título del Entregable</label>
-              <input required type="text" value={editingDbTask.title} onChange={e => setEditingDbTask({...editingDbTask, title: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#165399] outline-none" />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-bold text-[#165399] mb-1">Asignado a</label>
-                <select required value={editingDbTask.assigneeId} onChange={e => setEditingDbTask({...editingDbTask, assigneeId: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#165399] outline-none text-sm">
-                  {config.employees.map(emp => <option key={emp.id} value={emp.id}>{emp.name}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-bold text-[#165399] mb-1">Estado Fuerte</label>
-                <select required value={editingDbTask.status} onChange={e => setEditingDbTask({...editingDbTask, status: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#165399] outline-none text-sm">
-                  {Object.values(STATUS).map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-               <div>
-                  <label className="block text-sm font-bold text-[#165399] mb-1">Semana Asignada</label>
-                  <input required type="text" value={editingDbTask.assignedWeek} onChange={e => setEditingDbTask({...editingDbTask, assignedWeek: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#165399] outline-none text-sm" />
-               </div>
-               <div>
-                  <label className="block text-sm font-bold text-[#165399] mb-1">Enlace (URL Soportes)</label>
-                  <input type="text" value={editingDbTask.evidenceLink || ''} onChange={e => setEditingDbTask({...editingDbTask, evidenceLink: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#165399] outline-none text-sm" />
-               </div>
-            </div>
-            <div>
-               <label className="block text-sm font-bold text-[#165399] mb-1">Descripción de Gestión</label>
-               <textarea rows="3" value={editingDbTask.managementDescription || ''} onChange={e => setEditingDbTask({...editingDbTask, managementDescription: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#165399] outline-none text-sm"></textarea>
-            </div>
-            
-            <div className="pt-4 border-t border-gray-200 flex justify-end gap-2">
-              <button type="button" onClick={() => setIsEditDbModalOpen(false)} className="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg font-bold transition-colors">Cancelar</button>
-              <button type="submit" className="px-4 py-2 bg-[#165399] text-white rounded-lg hover:bg-[#114078] font-bold transition-colors shadow-sm">Guardar y Forzar Cambios</button>
-            </div>
-          </form>
-        )}
-      </Modal>
-
+      {/* Modal de edición de usuarios */}
       <Modal isOpen={isEditUserModalOpen} onClose={() => setIsEditUserModalOpen(false)} title="Editar Miembro del Equipo">
         {editingUser && (
           <form onSubmit={handleUpdateUser} className="space-y-4">
@@ -845,6 +785,46 @@ const AdminPanel = ({ config, onUpdateConfig, tasks, currentUser, onUpdateTaskDa
           </form>
         )}
       </Modal>
+
+      {/* Modal Edición Cruda de BD */}
+      <Modal isOpen={editDbModal} onClose={() => setEditDbModal(false)} title="Edición Cruda de Registro">
+        {dbTaskEdit && (
+          <form onSubmit={saveDbTaskEdit} className="space-y-4">
+            <div className="p-3 bg-orange-50 border border-orange-200 rounded text-xs text-orange-800 font-bold mb-4">
+              ⚠️ ATENCIÓN: Está editando directamente los valores crudos de la base de datos. Modificar estados o IDs sin cuidado puede romper la lógica del sistema.
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1">ID (No editable)</label>
+                <input type="text" value={dbTaskEdit.id} readOnly className="w-full px-3 py-1.5 border border-gray-300 rounded bg-gray-100 text-xs text-gray-500" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1">Cédula Asignado (assigneeId)</label>
+                <input type="text" value={dbTaskEdit.assigneeId} onChange={e => setDbTaskEdit({...dbTaskEdit, assigneeId: e.target.value})} className="w-full px-3 py-1.5 border border-gray-300 rounded text-xs" />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-xs font-bold text-gray-700 mb-1">Título</label>
+                <input type="text" value={dbTaskEdit.title} onChange={e => setDbTaskEdit({...dbTaskEdit, title: e.target.value})} className="w-full px-3 py-1.5 border border-gray-300 rounded text-xs" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1">Semana Asignada</label>
+                <input type="text" value={dbTaskEdit.assignedWeek} onChange={e => setDbTaskEdit({...dbTaskEdit, assignedWeek: e.target.value})} className="w-full px-3 py-1.5 border border-gray-300 rounded text-xs" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1">Estado (Debe coincidir exacto)</label>
+                <select value={dbTaskEdit.status} onChange={e => setDbTaskEdit({...dbTaskEdit, status: e.target.value})} className="w-full px-3 py-1.5 border border-gray-300 rounded text-xs">
+                  {Object.values(STATUS).map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+            </div>
+            <div className="pt-4 border-t border-gray-200 flex justify-end gap-2">
+              <button type="button" onClick={() => setEditDbModal(false)} className="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded font-bold text-sm">Cancelar</button>
+              <button type="submit" className="px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700 font-bold text-sm">Forzar Guardado en BD</button>
+            </div>
+          </form>
+        )}
+      </Modal>
+
     </div>
   );
 };
@@ -858,7 +838,6 @@ const JuniorDashboard = ({ user, tasks, categories, onAddTask, onUpdateTaskStatu
   const [requestContinuation, setRequestContinuation] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   
-  // Estados para Reprogramación
   const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false);
   const [rescheduleWeek, setRescheduleWeek] = useState('');
 
@@ -1020,10 +999,22 @@ const JuniorDashboard = ({ user, tasks, categories, onAddTask, onUpdateTaskStatu
                   {task.subcategory && <p className="text-xs text-[#8CC63F] font-bold mb-3">{task.subcategory}</p>}
                   
                   {task.comments && task.comments.length > 0 && (
-                     <div className="mt-2 mb-3 bg-red-50 p-3 rounded-lg border border-red-100">
-                        <p className="text-[10px] font-black text-red-700 uppercase mb-1 flex items-center gap-1"><Icon name="alert" className="w-3 h-3"/> Feedback de {task.comments[task.comments.length - 1].author}:</p>
-                        <p className="text-xs text-red-800 font-medium line-clamp-2">{task.comments[task.comments.length - 1].text}</p>
-                     </div>
+                     (() => {
+                        const style = task.status === STATUS.CUMPLIDO 
+                           ? { bg: "bg-[#f3f9eb]", border: "border-[#8CC63F]", title: "text-[#8CC63F]", icon: "text-[#8CC63F]", text: "text-green-800" }
+                           : (task.status === STATUS.NO_CUMPLIDO || task.status === STATUS.NO_REPORTADO)
+                           ? { bg: "bg-red-50", border: "border-red-200", title: "text-red-700", icon: "text-red-600", text: "text-red-800" }
+                           : { bg: "bg-yellow-50", border: "border-yellow-200", title: "text-yellow-700", icon: "text-yellow-600", text: "text-yellow-800" };
+
+                        return (
+                           <div className={`mt-2 mb-3 ${style.bg} p-3 rounded-lg border ${style.border}`}>
+                              <p className={`text-[10px] font-black ${style.title} uppercase mb-1 flex items-center gap-1`}>
+                                 <Icon name="alert" className={`w-3 h-3 ${style.icon}`}/> Feedback de {task.comments[task.comments.length - 1].author}:
+                              </p>
+                              <p className={`text-xs ${style.text} font-medium line-clamp-2`}>{task.comments[task.comments.length - 1].text}</p>
+                           </div>
+                        );
+                     })()
                   )}
 
                   <div className="flex items-center text-xs text-gray-500 font-medium gap-1 mt-auto pt-3 border-t border-gray-50">
@@ -1173,7 +1164,6 @@ const ReviewerDashboard = ({ user, tasks, categories, employees, onAddTask, onUp
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [authorizeContinuation, setAuthorizeContinuation] = useState(false);
   
-  // Estados para Reprogramación
   const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false);
   const [rescheduleWeek, setRescheduleWeek] = useState('');
   const upcomingWeeks = getUpcomingWeeksList();
@@ -1209,6 +1199,14 @@ const ReviewerDashboard = ({ user, tasks, categories, employees, onAddTask, onUp
 
   const uniqueWeeks = [...new Set(visibleTasks.map(t => t.assignedWeek))].sort().reverse();
   const uniqueCategories = [...new Set(visibleTasks.map(t => t.category))].sort();
+
+  const getSupervisorButtonClass = (status) => {
+    if (status === STATUS.EN_REVISION || status === STATUS.SOLICITUD_CONTINUIDAD) return "bg-[#165399] hover:bg-[#114078] text-white border border-[#165399]";
+    if (status === STATUS.CUMPLIDO) return "bg-[#8CC63F] hover:bg-[#78b030] text-white border border-[#8CC63F]";
+    if (status === STATUS.CON_OBSERVACIONES) return "bg-yellow-500 hover:bg-yellow-600 text-white border border-yellow-500";
+    if (status === STATUS.NO_CUMPLIDO) return "bg-red-600 hover:bg-red-700 text-white border border-red-600";
+    return "bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300";
+  };
 
   const handleReview = (decisionStatus) => {
     if ((decisionStatus === STATUS.CON_OBSERVACIONES || decisionStatus === STATUS.NO_CUMPLIDO) && !reviewComments.trim()) {
@@ -1418,7 +1416,10 @@ const ReviewerDashboard = ({ user, tasks, categories, employees, onAddTask, onUp
                           </div>
                         </div>
                         <div className="bg-gray-50 px-4 py-3 border-t border-gray-200 flex flex-wrap gap-2">
-                          <button onClick={() => { setActiveTask(task); setIsReviewModalOpen(true); setReviewComments(''); setErrorMsg(''); setAuthorizeContinuation(task.status === STATUS.SOLICITUD_CONTINUIDAD); }} className="text-[11px] flex-1 min-w-[100px] bg-[#165399] hover:bg-[#114078] text-white px-2 py-2 rounded-lg font-bold flex items-center justify-center gap-1 shadow-sm transition-colors">
+                          <button 
+                            onClick={() => { setActiveTask(task); setIsReviewModalOpen(true); setReviewComments(''); setErrorMsg(''); setAuthorizeContinuation(task.status === STATUS.SOLICITUD_CONTINUIDAD); }} 
+                            className={`text-[11px] flex-1 min-w-[100px] px-2 py-2 rounded-lg font-bold flex items-center justify-center gap-1 shadow-sm transition-colors ${getSupervisorButtonClass(task.status)}`}
+                          >
                              <Icon name="check" className="w-3 h-3" /> {(task.status === STATUS.EN_REVISION || task.status === STATUS.SOLICITUD_CONTINUIDAD) ? 'Evaluar Entregable' : (task.status === STATUS.ASIGNADO || task.status === STATUS.EN_PROGRESO || task.status === STATUS.NO_REPORTADO) ? 'Ver Estado' : 'Modificar Revisión'}
                           </button>
                           <button onClick={() => openEditModal(task)} className="text-[11px] flex-1 min-w-[70px] bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 px-2 py-2 rounded-lg font-bold flex items-center justify-center gap-1 shadow-sm transition-colors">
@@ -1799,6 +1800,30 @@ const App = () => {
     }
   };
 
+  const handleImportTasks = async (importedTasks) => {
+    if (!Array.isArray(importedTasks)) return;
+    if (db) {
+      for (const t of importedTasks) {
+        try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'emssanar_tasks', t.id), t); } catch (e) {}
+      }
+    } else {
+      const newTasks = [...tasks, ...importedTasks];
+      setTasks(newTasks);
+      localStorage.setItem('emssanar_tasks', JSON.stringify(newTasks));
+    }
+  };
+
+  const handleClearAllTasks = async () => {
+    if (db) {
+      for (const t of tasks) {
+        try { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'emssanar_tasks', t.id)); } catch (e) {}
+      }
+    } else {
+      setTasks([]);
+      localStorage.setItem('emssanar_tasks', JSON.stringify([]));
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 text-gray-800 font-sans">
       <header className="bg-[#165399] text-white shadow-lg sticky top-0 z-40 border-b-4 border-[#8CC63F]">
@@ -1834,7 +1859,16 @@ const App = () => {
 
       <main className="max-w-7xl mx-auto px-4 py-8">
         {dashboardMode === 'ADMIN' ? (
-          <AdminPanel config={appConfig} onUpdateConfig={handleUpdateConfig} tasks={tasks} currentUser={currentUser} onUpdateTaskData={handleUpdateTaskData} onDeleteTask={handleDeleteTask} onAddTask={handleAddTask} />
+          <AdminPanel 
+            config={appConfig} 
+            onUpdateConfig={handleUpdateConfig} 
+            tasks={tasks} 
+            currentUser={currentUser}
+            onUpdateTaskData={handleUpdateTaskData}
+            onDeleteTask={handleDeleteTask}
+            onImportTasks={handleImportTasks}
+            onClearAllTasks={handleClearAllTasks}
+          />
         ) : (
           <>
             <div className="mb-6 flex gap-4">
