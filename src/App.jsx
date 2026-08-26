@@ -305,7 +305,7 @@ const LoginScreen = ({ onLogin, employees }) => {
   );
 };
 
-/* --- MÓDULO DE DASHBOARD / MÉTRICAS --- */
+/*/* --- MÓDULO DE DASHBOARD / MÉTRICAS --- */
 const DashboardMetrics = ({ tasks, employees }) => {
   const total = tasks.length;
   
