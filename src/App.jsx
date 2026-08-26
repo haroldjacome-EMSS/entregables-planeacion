@@ -63,7 +63,7 @@ const STATUS_HEX_COLORS = {
   [STATUS.SOLICITUD_CONTINUIDAD]: '#9333EA',
   [STATUS.CUMPLIDO]: '#8CC63F',
   [STATUS.CON_OBSERVACIONES]: '#EAB308',
-  [STATUS.NO_CUMPLIDO]: '#E7000b', 
+  [STATUS.NO_CUMPLIDO]: '#e7000b', 
   [STATUS.CONTINUADO]: '#F97316',
   [STATUS.NO_REPORTADO]: '#DC2626',
 };
@@ -173,6 +173,7 @@ const groupTasksByWeek = (tasksList) => {
 const Icon = ({ name, className }) => {
   const icons = {
     user: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>,
+    users: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>,
     plus: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>,
     clock: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>,
     edit: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>,
@@ -1160,9 +1161,16 @@ const ReviewerDashboard = ({ user, tasks, categories, employees, onAddTask, onUp
   const [activeTask, setActiveTask] = useState(null);
   const [reviewComments, setReviewComments] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
+  
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [authorizeContinuation, setAuthorizeContinuation] = useState(false);
+  
+  // Estados para Asignación Grupal
+  const [isGroupAssignModalOpen, setIsGroupAssignModalOpen] = useState(false);
+  const [groupFormData, setGroupFormData] = useState({
+    title: '', categoryId: '', subcategory: '', description: '', week: getWeekData(new Date()), assigneeIds: []
+  });
   
   const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false);
   const [rescheduleWeek, setRescheduleWeek] = useState('');
@@ -1173,6 +1181,7 @@ const ReviewerDashboard = ({ user, tasks, categories, employees, onAddTask, onUp
   });
 
   const selectedCategory = categories.find(c => c.id === formData.categoryId);
+  const groupSelectedCategory = categories.find(c => c.id === groupFormData.categoryId);
 
   const [filterWeek, setFilterWeek] = useState('ALL');
   const [filterCategory, setFilterCategory] = useState('ALL');
@@ -1183,6 +1192,11 @@ const ReviewerDashboard = ({ user, tasks, categories, employees, onAddTask, onUp
   const canSeeAll = user.role === 'Jefe' || user.role === 'Coordinador';
   const myTeamMembers = employees.filter(emp => emp.reviewerId === user.id);
   const myTeamIds = myTeamMembers.map(emp => emp.id);
+
+  // Determinar quiénes están disponibles para la asignación grupal
+  const availableJuniors = canSeeAll 
+    ? employees.filter(e => e.role === 'Junior' || e.role === 'Aprendiz') 
+    : employees.filter(e => myTeamIds.includes(e.id));
 
   const visibleTasks = tasks.filter(task => {
     if (canSeeAll && viewScope === 'ALL') return true;
@@ -1278,6 +1292,44 @@ const ReviewerDashboard = ({ user, tasks, categories, employees, onAddTask, onUp
     setFormData({ title: '', categoryId: '', subcategory: '', description: '', assigneeId: '', week: getWeekData(new Date()) });
   };
 
+  const handleCreateGroupTask = (e) => {
+    e.preventDefault();
+    if (groupFormData.assigneeIds.length === 0) {
+      alert("Debe seleccionar al menos un profesional para asignar.");
+      return;
+    }
+
+    const taskSubcategoryObj = groupSelectedCategory?.subcategories?.find(s => s.name === groupFormData.subcategory);
+    const deadlineInfo = (groupFormData.categoryId === 1 && taskSubcategoryObj?.maxWeeks)
+        ? `Máximo ${taskSubcategoryObj.maxWeeks} semana(s)` : 'Sin límite estricto';
+
+    groupFormData.assigneeIds.forEach((assigneeId, index) => {
+      const newTask = {
+        id: Date.now().toString() + '-' + index, // Asegurar ID único
+        title: groupFormData.title,
+        description: groupFormData.description,
+        category: groupSelectedCategory.name,
+        subcategory: groupFormData.categoryId === 1 ? groupFormData.subcategory : '',
+        deadlineInfo,
+        assignedWeek: groupFormData.week,
+        assigneeId: assigneeId,
+        reviewerId: employees.find(emp => emp.id === assigneeId)?.reviewerId || user.id,
+        status: STATUS.ASIGNADO,
+        createdAt: getCurrentDateFormatted(),
+        comments: [],
+        managementDescription: '',
+        evidenceLink: '',
+        continuedCount: 0,
+        allowExtraTime: false
+      };
+      onAddTask(newTask);
+    });
+
+    setIsGroupAssignModalOpen(false);
+    setGroupFormData({ title: '', categoryId: '', subcategory: '', description: '', week: getWeekData(new Date()), assigneeIds: [] });
+    alert(`Se han asignado ${groupFormData.assigneeIds.length} entregables exitosamente.`);
+  };
+
   const openEditModal = (task) => {
     setActiveTask(task);
     const cat = categories.find(c => c.name === task.category);
@@ -1327,15 +1379,18 @@ const ReviewerDashboard = ({ user, tasks, categories, employees, onAddTask, onUp
             <h2 className="text-xl font-black text-[#165399]">Seguimiento Global del Equipo</h2>
             <p className="text-sm text-gray-500 font-medium">Revise y gestione los productos asignados.</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap lg:flex-nowrap">
             {canSeeAll && (
               <div className="flex bg-gray-100 p-1 rounded-lg border border-gray-200">
                 <button onClick={() => setViewScope('MY_TEAM')} className={`px-4 py-2 text-sm font-bold rounded-md transition-colors ${viewScope === 'MY_TEAM' ? 'bg-white text-[#165399] shadow-sm' : 'text-gray-500 hover:text-gray-800'}`}>Mi Equipo Directo</button>
                 <button onClick={() => setViewScope('ALL')} className={`px-4 py-2 text-sm font-bold rounded-md transition-colors ${viewScope === 'ALL' ? 'bg-white text-[#165399] shadow-sm' : 'text-gray-500 hover:text-gray-800'}`}>Todo el Equipo</button>
               </div>
             )}
+            <button onClick={() => { setGroupFormData(prev => ({...prev, assigneeIds: availableJuniors.map(e=>e.id)})); setIsGroupAssignModalOpen(true); }} className="flex items-center gap-2 bg-[#165399] hover:bg-[#114078] text-white px-4 py-2 rounded-lg font-bold transition-colors shadow-sm">
+              <Icon name="users" className="w-5 h-5" /> Asignación Grupal
+            </button>
             <button onClick={() => setIsAssignModalOpen(true)} className="flex items-center gap-2 bg-[#8CC63F] hover:bg-[#78b030] text-white px-4 py-2 rounded-lg font-bold transition-colors shadow-sm">
-              <Icon name="plus" className="w-5 h-5" /> Asignar a Profesional
+              <Icon name="plus" className="w-5 h-5" /> Individual
             </button>
           </div>
         </div>
@@ -1557,7 +1612,68 @@ const ReviewerDashboard = ({ user, tasks, categories, employees, onAddTask, onUp
           </div>
           <div className="pt-4 border-t border-gray-200 flex justify-end gap-2">
             <button type="button" onClick={() => setIsAssignModalOpen(false)} className="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg font-bold transition-colors">Cancelar</button>
-            <button type="submit" className="px-4 py-2 bg-[#165399] text-white rounded-lg hover:bg-[#114078] font-bold transition-colors shadow-sm">Asignar Entregable</button>
+            <button type="submit" className="px-4 py-2 bg-[#8CC63F] text-white rounded-lg hover:bg-[#78b030] font-bold transition-colors shadow-sm">Asignar Entregable</button>
+          </div>
+        </form>
+      </Modal>
+
+      <Modal isOpen={isGroupAssignModalOpen} onClose={() => setIsGroupAssignModalOpen(false)} title="Asignación Grupal de Entregable (Colaboración)">
+        <form onSubmit={handleCreateGroupTask} className="space-y-4">
+          <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+            <div className="flex justify-between items-center mb-2">
+              <label className="block text-sm font-bold text-[#165399]">Seleccione los profesionales <span className="text-red-500">*</span></label>
+              <button type="button" onClick={() => {
+                  if(groupFormData.assigneeIds.length === availableJuniors.length) setGroupFormData({...groupFormData, assigneeIds: []});
+                  else setGroupFormData({...groupFormData, assigneeIds: availableJuniors.map(e=>e.id)});
+              }} className="text-xs text-[#165399] font-bold hover:underline bg-white px-2 py-1 rounded border border-blue-200 shadow-sm">
+                  {groupFormData.assigneeIds.length === availableJuniors.length ? 'Deseleccionar todos' : 'Seleccionar todos'}
+              </button>
+            </div>
+            <div className="max-h-32 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-2 bg-white p-2 border border-blue-100 rounded">
+              {availableJuniors.map(emp => (
+                 <label key={emp.id} className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                   <input type="checkbox" checked={groupFormData.assigneeIds.includes(emp.id)} onChange={(e) => {
+                       if (e.target.checked) setGroupFormData({...groupFormData, assigneeIds: [...groupFormData.assigneeIds, emp.id]});
+                       else setGroupFormData({...groupFormData, assigneeIds: groupFormData.assigneeIds.filter(id => id !== emp.id)});
+                   }} className="rounded text-[#165399] focus:ring-[#165399]" />
+                   {emp.name}
+                 </label>
+              ))}
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-[#165399] mb-1">Título del Producto / Entregable <span className="text-red-500">*</span></label>
+            <input required type="text" value={groupFormData.title} onChange={e => setGroupFormData({...groupFormData, title: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#165399] outline-none" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-bold text-[#165399] mb-1">Categoría <span className="text-red-500">*</span></label>
+              <select required value={groupFormData.categoryId} onChange={e => setGroupFormData({...groupFormData, categoryId: e.target.value ? parseInt(e.target.value) : '', subcategory: ''})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#165399] outline-none">
+                <option value="">Seleccione una categoría...</option>
+                {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+            </div>
+            {groupFormData.categoryId === 1 && (
+              <div>
+                <label className="block text-sm font-bold text-[#165399] mb-1">Tipo de Documento <span className="text-red-500">*</span></label>
+                <select required value={groupFormData.subcategory} onChange={e => setGroupFormData({...groupFormData, subcategory: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#165399] outline-none">
+                  <option value="">Seleccione...</option>
+                  {groupSelectedCategory?.subcategories?.map((s, idx) => <option key={idx} value={s.name}>{s.name} {s.maxWeeks ? `(Máx. ${s.maxWeeks} sem)` : ''}</option>)}
+                </select>
+              </div>
+            )}
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-[#165399] mb-1">Semana de Ejecución <span className="text-red-500">*</span></label>
+            <input required type="text" value={groupFormData.week} onChange={e => setGroupFormData({...groupFormData, week: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#165399] outline-none" />
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-[#165399] mb-1">Descripción / Objetivos Específicos</label>
+            <textarea rows="3" value={groupFormData.description} onChange={e => setGroupFormData({...groupFormData, description: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#165399] outline-none"></textarea>
+          </div>
+          <div className=" del dice flex gap-2" isOpen="{isGroupAssignModalOpen}...`," justify-end la línea pt-4 que type="submit">
+            <button type="button" onClick={() => setIsGroupAssignModalOpen(false)} className="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg font-bold transition-colors">Cancelar</button>
+            <button type="submit" className="px-4 py-2 bg-[#165399] text-white rounded-lg hover:bg-[#114078] font-bold transition-colors shadow-sm">Asignar a Grupo</button>
           </div>
         </form>
       </Modal>
