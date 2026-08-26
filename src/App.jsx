@@ -63,7 +63,7 @@ const STATUS_HEX_COLORS = {
   [STATUS.SOLICITUD_CONTINUIDAD]: '#9333EA',
   [STATUS.CUMPLIDO]: '#8CC63F',
   [STATUS.CON_OBSERVACIONES]: '#EAB308',
-  [STATUS.NO_CUMPLIDO]: '#e7000b', 
+  [STATUS.NO_CUMPLIDO]: '#991B1B', 
   [STATUS.CONTINUADO]: '#F97316',
   [STATUS.NO_REPORTADO]: '#DC2626',
 };
@@ -227,7 +227,7 @@ const LoginScreen = ({ onLogin, employees }) => {
       if (password === user.id) {
         onLogin(user);
       } else {
-        setErrorMsg('Contraseña incorrecta. Recuerde que su contraseña es su número de cédula.');
+        setErrorMsg('Contraseña incorrecta.');
       }
     }
   };
@@ -281,7 +281,7 @@ const LoginScreen = ({ onLogin, employees }) => {
               type="password"
               value={password}
               onChange={(e) => { setPassword(e.target.value); setErrorMsg(''); }}
-              placeholder="Número de cédula"
+              placeholder="••••••••••"
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#165399] outline-none transition-shadow bg-gray-50 text-gray-800 font-medium"
             />
           </div>
@@ -1193,10 +1193,8 @@ const ReviewerDashboard = ({ user, tasks, categories, employees, onAddTask, onUp
   const myTeamMembers = employees.filter(emp => emp.reviewerId === user.id);
   const myTeamIds = myTeamMembers.map(emp => emp.id);
 
-  // Determinar quiénes están disponibles para la asignación grupal
-  const availableJuniors = canSeeAll 
-    ? employees.filter(e => e.role === 'Junior' || e.role === 'Aprendiz') 
-    : employees.filter(e => myTeamIds.includes(e.id));
+  // Determinar quiénes están disponibles para la asignación grupal: Todos los Juniors y Aprendices de la empresa
+  const availableJuniors = employees.filter(e => e.role === 'Junior' || e.role === 'Aprendiz');
 
   const visibleTasks = tasks.filter(task => {
     if (canSeeAll && viewScope === 'ALL') return true;
@@ -1671,7 +1669,7 @@ const ReviewerDashboard = ({ user, tasks, categories, employees, onAddTask, onUp
             <label className="block text-sm font-bold text-[#165399] mb-1">Descripción / Objetivos Específicos</label>
             <textarea rows="3" value={groupFormData.description} onChange={e => setGroupFormData({...groupFormData, description: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#165399] outline-none"></textarea>
           </div>
-          <div className=" del dice flex gap-2" isOpen="{isGroupAssignModalOpen}...`," justify-end la línea pt-4 que type="submit">
+          <div className="pt-4 border-t border-gray-200 flex justify-end gap-2">
             <button type="button" onClick={() => setIsGroupAssignModalOpen(false)} className="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg font-bold transition-colors">Cancelar</button>
             <button type="submit" className="px-4 py-2 bg-[#165399] text-white rounded-lg hover:bg-[#114078] font-bold transition-colors shadow-sm">Asignar a Grupo</button>
           </div>
