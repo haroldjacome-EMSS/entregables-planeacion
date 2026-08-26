@@ -327,12 +327,26 @@ const DashboardMetrics = ({ tasks, employees }) => {
     { name: 'No Cumplido', value: groupedStatusCounts['No Cumplido'], fill: STATUS_HEX_COLORS[STATUS.NO_CUMPLIDO] }
   ].filter(item => item.value > 0);
 
-  // Agrupación de 3 estados para la gráfica de barras (BarChart)
+  // Agrupación de 3 estados para la gráfica de barras (BarChart) - CORREGIDO PARA NOMBRE + APELLIDO
   const assigneeStats = tasks.reduce((acc, task) => {
-    const name = getAssigneeName(task.assigneeId, employees).split(' ')[0];
-    if (!acc[name]) {
-      acc[name] = { 
-        profesional: name, 
+    const empId = task.assigneeId; // Usamos el ID para evitar que se fusionen personas con el mismo nombre
+
+    if (!acc[empId]) {
+      const fullName = getAssigneeName(empId, employees);
+      const parts = fullName.trim().split(' ');
+      let displayName = parts[0];
+      
+      // Lógica para obtener Primer Nombre y Primer Apellido
+      if (parts.length >= 4) {
+        displayName = `${parts[0]} ${parts[2]}`; // Ej: Andrés Felipe Realpe Pantoja -> Andrés Realpe
+      } else if (parts.length === 3) {
+        displayName = `${parts[0]} ${parts[1]}`; // Ej: Jheison Diaz Lopez -> Jheison Diaz
+      } else if (parts.length === 2) {
+        displayName = `${parts[0]} ${parts[1]}`;
+      }
+
+      acc[empId] = { 
+        profesional: displayName, 
         'Cumplido': 0, 
         'En Revisión': 0, 
         'No Cumplido': 0,
@@ -341,14 +355,14 @@ const DashboardMetrics = ({ tasks, employees }) => {
     }
     
     if (task.status === STATUS.CUMPLIDO) {
-      acc[name]['Cumplido'] += 1;
+      acc[empId]['Cumplido'] += 1;
     } else if (task.status === STATUS.NO_CUMPLIDO || task.status === STATUS.NO_REPORTADO) {
-      acc[name]['No Cumplido'] += 1;
+      acc[empId]['No Cumplido'] += 1;
     } else {
-      acc[name]['En Revisión'] += 1;
+      acc[empId]['En Revisión'] += 1;
     }
     
-    acc[name].total += 1;
+    acc[empId].total += 1;
     return acc;
   }, {});
 
