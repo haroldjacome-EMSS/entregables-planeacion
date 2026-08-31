@@ -63,27 +63,27 @@ const STATUS_HEX_COLORS = {
   [STATUS.SOLICITUD_CONTINUIDAD]: '#9333EA',
   [STATUS.CUMPLIDO]: '#8CC63F',
   [STATUS.CON_OBSERVACIONES]: '#EAB308',
-  [STATUS.NO_CUMPLIDO]: '#991B1B', 
+  [STATUS.NO_CUMPLIDO]: '#f44236', 
   [STATUS.CONTINUADO]: '#F97316',
   [STATUS.NO_REPORTADO]: '#DC2626',
 };
 
 const DEFAULT_EMPLOYEES = [
-  { id: '1085253822', email: 'jhoana.vallejo@emssanar.com', name: 'Jhoana Consuelo Vallejo Ramos', role: 'Jefe', canReview: true },
-  { id: '1085929260', email: 'harold.jacome@emssanar.com', name: 'Harold Andres Jacome', role: 'Coordinador', canReview: true },
-  { id: '1144210824', email: 'angie.champutiz@emssanar.com', name: 'Angie Carolina Champutiz Vera', role: 'Especializado', canReview: true },
-  { id: '52706231', email: 'iveth.ruales@emssanar.com', name: 'Iveth Juliana Ruales Reyes', role: 'Especializado', canReview: true },
-  { id: '1085322527', email: 'catherine.guzman@emssanar.com', name: 'Catherine Andrea Guzman Cabrera', role: 'Junior', reviewerId: '52706231' },
-  { id: '1085320212', email: 'kelinn.saavedra@emssanar.com', name: 'Kelinn Alexandra Saavedra Moreno', role: 'Junior', reviewerId: '1144210824' },
-  { id: '1085308340', email: 'andres.chaves@emssanar.com', name: 'Andres Giovani Chaves Rosales', role: 'Junior', reviewerId: '1085929260' },
-  { id: '1085339480', email: 'angie.polo@emssanar.com', name: 'Angie Carolina Polo Delgado', role: 'Junior', reviewerId: '1144210824' },
-  { id: '1085320251', email: 'diana.rodriguez@emssanar.com', name: 'Diana Marcela Rodriguez Garcia', role: 'Junior', reviewerId: '1085929260' },
-  { id: '1085331161', email: 'jesus.yampuezan@emssanar.com', name: 'Jesus Daniel Yampuezan Benavides', role: 'Junior', reviewerId: '1144210824' },
-  { id: '1085318323', email: 'andres.realpe@emssanar.com', name: 'Andrés Felipe Realpe Pantoja', role: 'Junior', reviewerId: '52706231' },
-  { id: '1085324699', email: 'andres.delgado@emssanar.com', name: 'Andrés Felipe Delgado Riascos', role: 'Junior', reviewerId: '52706231' },
-  { id: '1094949915', email: 'jheison.diaz@emssanar.com', name: 'Jheison Diaz Lopez', role: 'Junior', reviewerId: '1085929260' },
-  { id: '1085322996', email: 'andres.cabezas@emssanar.com', name: 'Andrés Francisco Cabezas Dajome', role: 'Junior', reviewerId: '1085253822' },
-  { id: '1087643352', email: 'harrison.castillo@emssanar.com', name: 'Harrison Hermel Castillo Chicunque', role: 'Aprendiz', reviewerId: '1085929260' }
+  { id: '1085253822', email: 'johanavallejo@emssanareps.co', name: 'Jhoana Consuelo Vallejo Ramos', role: 'Jefe', canReview: true },
+  { id: '1085929260', email: 'haroldjacome@emssanareps.co', name: 'Harold Andres Jacome', role: 'Coordinador', canReview: true },
+  { id: '1144210824', email: 'angiechamputiz@emssanareps.co', name: 'Angie Carolina Champutiz Vera', role: 'Especializado', canReview: true },
+  { id: '52706231', email: 'julianaruales@emssanareps.co', name: 'Iveth Juliana Ruales Reyes', role: 'Especializado', canReview: true },
+  { id: '1085322527', email: 'andreaguzman@emssanareps.co', name: 'Catherine Andrea Guzman Cabrera', role: 'Junior', reviewerId: '52706231' },
+  { id: '1085320212', email: 'alexandrasaavedra@emssanareps.co', name: 'Kelinn Alexandra Saavedra Moreno', role: 'Junior', reviewerId: '1144210824' },
+  { id: '1085308340', email: 'andreschavez@emssanareps.co', name: 'Andres Giovani Chaves Rosales', role: 'Junior', reviewerId: '1085929260' },
+  { id: '1085339480', email: 'angiepolo@emssanareps.co', name: 'Angie Carolina Polo Delgado', role: 'Junior', reviewerId: '1144210824' },
+  { id: '1085320251', email: 'dianamarcelarodriguez@emssanareps.co', name: 'Diana Marcela Rodriguez Garcia', role: 'Junior', reviewerId: '1085929260' },
+  { id: '1085331161', email: 'jesusyampuezan@emssanareps.co', name: 'Jesus Daniel Yampuezan Benavides', role: 'Junior', reviewerId: '1144210824' },
+  { id: '1085318323', email: 'feliperealpe@emssanareps.co', name: 'Andrés Felipe Realpe Pantoja', role: 'Junior', reviewerId: '52706231' },
+  { id: '1085324699', email: 'andresdelgado@emssanareps.co', name: 'Andrés Felipe Delgado Riascos', role: 'Junior', reviewerId: '52706231' },
+  { id: '1094949915', email: 'jheisondiaz@emssanareps.co', name: 'Jheison Diaz Lopez', role: 'Junior', reviewerId: '1085929260' },
+  { id: '1085322996', email: 'andrescabezas@emssanareps.co', name: 'Andrés Francisco Cabezas Dajome', role: 'Junior', reviewerId: '1085253822' },
+  { id: '1087643352', email: 'harrisoncastillo@emssanareps.co', name: 'Harrison Hermel Castillo Chicunque', role: 'Aprendiz', reviewerId: '1085929260' }
 ];
 
 const DEFAULT_CATEGORIES = [
