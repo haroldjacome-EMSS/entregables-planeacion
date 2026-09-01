@@ -68,6 +68,9 @@ const STATUS_HEX_COLORS = {
   [STATUS.NO_REPORTADO]: '#DC2626',
 };
 
+// ==========================================
+// CORREOS OFICIALES Y DATOS POR DEFECTO
+// ==========================================
 const DEFAULT_EMPLOYEES = [
   { id: '1085253822', email: 'johanavallejo@emssanareps.co', name: 'Jhoana Consuelo Vallejo Ramos', role: 'Jefe', canReview: true },
   { id: '1085929260', email: 'haroldjacome@emssanareps.co', name: 'Harold Andres Jacome', role: 'Coordinador', canReview: true },
@@ -88,16 +91,11 @@ const DEFAULT_EMPLOYEES = [
 
 const DEFAULT_CATEGORIES = [
   { 
-    id: 1, 
-    name: 'Gestión y documentación de procesos',
-    shortName: 'Procesos',
+    id: 1, name: 'Gestión y documentación de procesos', shortName: 'Procesos',
     subcategories: [
-      { name: 'Subprocesos', maxWeeks: 4 },
-      { name: 'Protocolos y Rutas', maxWeeks: 4 },
-      { name: 'Procedimientos', maxWeeks: 2 },
-      { name: 'Manuales', maxWeeks: 2 },
-      { name: 'Formatos', maxWeeks: 1 },
-      { name: 'Indicadores', maxWeeks: 1 },
+      { name: 'Subprocesos', maxWeeks: 4 }, { name: 'Protocolos y Rutas', maxWeeks: 4 },
+      { name: 'Procedimientos', maxWeeks: 2 }, { name: 'Manuales', maxWeeks: 2 },
+      { name: 'Formatos', maxWeeks: 1 }, { name: 'Indicadores', maxWeeks: 1 },
       { name: 'Socialización', maxWeeks: null }
     ]
   },
@@ -120,36 +118,28 @@ const DEFAULT_INDICATORS = [
   }
 ];
 
-/* FUNCIONES AUXILIARES */
+/* FUNCIONES AUXILIARES BLINDADAS */
 const getWeekData = (dateInput) => {
   if (!dateInput) return '';
   if (typeof dateInput === 'string' && dateInput.includes('/')) return dateInput; 
-  
   const d = new Date(dateInput);
   if (isNaN(d.getTime())) return '';
-  
   d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
   const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
   const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
   const year = d.getUTCFullYear();
-
-  const monday = new Date(d);
-  monday.setUTCDate(monday.getUTCDate() - 3);
-  const friday = new Date(monday);
-  friday.setUTCDate(friday.getUTCDate() + 4);
-
+  const monday = new Date(d); monday.setUTCDate(monday.getUTCDate() - 3);
+  const friday = new Date(monday); friday.setUTCDate(friday.getUTCDate() + 4);
   const formatDate = (dt) => `${dt.getUTCDate().toString().padStart(2, '0')}/${(dt.getUTCMonth() + 1).toString().padStart(2, '0')}/${dt.getUTCFullYear().toString().slice(-2)}`;
-  
   return `${year}-W${weekNo.toString().padStart(2, '0')} (${formatDate(monday)} al ${formatDate(friday)})`;
 };
 
 const getNextWeekData = (weekString) => {
   if (!weekString) return getWeekData(new Date(Date.now() + 7 * 86400000));
-  const match = weekString.match(/\((\d{2})\/(\d{2})\/(\d{2})/);
+  const match = String(weekString).match(/\((\d{2})\/(\d{2})\/(\d{2})/);
   if (match) {
-    const [_, day, month, yearStr] = match;
-    const year = parseInt(yearStr, 10) + 2000;
-    const date = new Date(year, parseInt(month, 10) - 1, parseInt(day, 10));
+    const year = parseInt(match[3], 10) + 2000;
+    const date = new Date(year, parseInt(match[2], 10) - 1, parseInt(match[1], 10));
     date.setDate(date.getDate() + 7);
     return getWeekData(date);
   }
@@ -160,8 +150,7 @@ const getUpcomingWeeksList = () => {
   const weeks = [];
   const now = new Date();
   for (let i = -4; i < 12; i++) {
-    const d = new Date(now.getTime() + i * 7 * 86400000);
-    weeks.push(getWeekData(d));
+    weeks.push(getWeekData(new Date(now.getTime() + i * 7 * 86400000)));
   }
   return [...new Set(weeks)];
 };
@@ -171,13 +160,13 @@ const getCurrentDateFormatted = () => {
   return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth()+1).toString().padStart(2, '0')}/${d.getFullYear()} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
 };
 
-const getAssigneeName = (id, employees) => employees?.find(e => e.id === id)?.name || 'Desconocido';
+const getAssigneeName = (id, employees) => (employees || []).find(e => e.id === id)?.name || 'Desconocido';
 
 const groupTasksByWeek = (tasksList) => {
-  if (!tasksList || tasksList.length === 0) return {};
-  const sorted = [...tasksList].sort((a, b) => (b.assignedWeek || '').localeCompare(a.assignedWeek || ''));
+  if (!tasksList || !Array.isArray(tasksList)) return {};
+  const sorted = [...tasksList].sort((a, b) => (b?.assignedWeek || '').localeCompare(a?.assignedWeek || ''));
   return sorted.reduce((acc, task) => {
-    const week = task.assignedWeek || 'Sin fecha asignada';
+    const week = task?.assignedWeek || 'Sin fecha asignada';
     if (!acc[week]) acc[week] = [];
     acc[week].push(task);
     return acc;
@@ -207,7 +196,7 @@ const Icon = ({ name, className }) => {
     alert: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>,
     download: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>,
     upload: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>,
-    settings: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>,
+    settings: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>,
     target: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>,
     activity: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
   };
@@ -261,26 +250,12 @@ const LoginScreen = ({ onLogin, authError }) => {
         <form onSubmit={handleLogin} className="space-y-6">
           <div>
             <label className="block text-sm font-semibold text-[#165399] mb-2">Correo Institucional</label>
-            <input 
-              required
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="ejemplo@emssanareps.co"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#165399] outline-none transition-shadow bg-gray-50 text-gray-800 font-medium"
-            />
+            <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="ejemplo@emssanareps.co" className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#165399] outline-none transition-shadow bg-gray-50 text-gray-800 font-medium" />
           </div>
 
           <div>
             <label className="block text-sm font-semibold text-[#165399] mb-2">Contraseña</label>
-            <input 
-              required
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Ingrese su contraseña"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#165399] outline-none transition-shadow bg-gray-50 text-gray-800 font-medium"
-            />
+            <input required type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Ingrese su contraseña" className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#165399] outline-none transition-shadow bg-gray-50 text-gray-800 font-medium" />
           </div>
 
           {authError && (
@@ -289,12 +264,8 @@ const LoginScreen = ({ onLogin, authError }) => {
             </div>
           )}
 
-          <button 
-            type="submit" 
-            disabled={!email || !password || loading}
-            className="w-full bg-[#8CC63F] hover:bg-[#78b030] text-white font-bold py-3 px-4 rounded-lg transition-colors disabled:opacity-50 shadow-md"
-          >
-            {loading ? 'Verificando credenciales...' : 'Ingresar al Sistema'}
+          <button type="submit" disabled={!email || !password || loading} className="w-full bg-[#8CC63F] hover:bg-[#78b030] text-white font-bold py-3 px-4 rounded-lg transition-colors disabled:opacity-50 shadow-md">
+            {loading ? 'Verificando...' : 'Ingresar al Sistema'}
           </button>
         </form>
       </div>
@@ -306,29 +277,24 @@ const LoginScreen = ({ onLogin, authError }) => {
 const DashboardMetrics = ({ tasks, employees }) => {
   const total = tasks?.length || 0;
   
-  const cumplidos = tasks?.filter(t => t.status === STATUS.CUMPLIDO).length || 0;
-  const noCumplidos = tasks?.filter(t => t.status === STATUS.NO_CUMPLIDO || t.status === STATUS.NO_REPORTADO).length || 0;
+  const cumplidos = (tasks || []).filter(t => t?.status === STATUS.CUMPLIDO).length || 0;
+  const noCumplidos = (tasks || []).filter(t => t?.status === STATUS.NO_CUMPLIDO || t?.status === STATUS.NO_REPORTADO).length || 0;
   const enRevisionYOtros = total - cumplidos - noCumplidos;
 
-  const groupedStatusCounts = {
-    'Cumplidos': cumplidos,
-    'En Revisión / Pendientes': enRevisionYOtros,
-    'No Cumplido': noCumplidos
-  };
-
   const pieData = [
-    { name: 'Cumplidos', value: groupedStatusCounts['Cumplidos'], fill: STATUS_HEX_COLORS[STATUS.CUMPLIDO] },
-    { name: 'En Revisión / Pendientes', value: groupedStatusCounts['En Revisión / Pendientes'], fill: STATUS_HEX_COLORS[STATUS.EN_REVISION] },
-    { name: 'No Cumplido', value: groupedStatusCounts['No Cumplido'], fill: STATUS_HEX_COLORS[STATUS.NO_CUMPLIDO] }
+    { name: 'Cumplidos', value: cumplidos, fill: STATUS_HEX_COLORS[STATUS.CUMPLIDO] },
+    { name: 'En Revisión / Pendientes', value: enRevisionYOtros, fill: STATUS_HEX_COLORS[STATUS.EN_REVISION] },
+    { name: 'No Cumplido', value: noCumplidos, fill: STATUS_HEX_COLORS[STATUS.NO_CUMPLIDO] }
   ].filter(item => item.value > 0);
 
-  const assigneeStats = tasks?.reduce((acc, task) => {
-    const empId = task.assigneeId; 
+  const assigneeStats = (tasks || []).reduce((acc, task) => {
+    const empId = task?.assigneeId; 
+    if (!empId) return acc;
 
     if (!acc[empId]) {
       const fullName = getAssigneeName(empId, employees) || 'Desconocido';
       const parts = fullName.trim().split(' ');
-      let displayName = parts[0];
+      let displayName = parts[0] || 'Usuario';
       
       if (parts.length >= 4) displayName = `${parts[0]} ${parts[2]}`;
       else if (parts.length === 3) displayName = `${parts[0]} ${parts[1]}`;
@@ -345,9 +311,9 @@ const DashboardMetrics = ({ tasks, employees }) => {
     return acc;
   }, {}) || {};
 
-  const barData = Object.values(assigneeStats).sort((a, b) => b.total - a.total);
+  const barData = Object.values(assigneeStats).sort((a, b) => (b?.total || 0) - (a?.total || 0));
 
-  const renderPieLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index, value }) => {
+  const renderPieLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, value }) => {
     if (value === 0) return null;
     const radius = innerRadius + (outerRadius - innerRadius) * 0.6;
     const x = cx + radius * Math.cos(-midAngle * Math.PI / 180);
@@ -435,11 +401,11 @@ const IndicatorsManager = ({ user, tasks, employees, config, measurements, onSav
   const [selectedPeriod, setSelectedPeriod] = useState(currentMonthValue);
   const [viewScope, setViewScope] = useState('MY_TEAM'); 
 
-  const canSeeAll = user.role === 'Jefe' || user.role === 'Coordinador';
-  const availableJuniors = (employees || []).filter(e => e.role === 'Junior' || e.role === 'Aprendiz');
-  const myTeamIds = (employees || []).filter(emp => emp.reviewerId === user.id).map(e => e.id);
+  // TODOS los supervisores pueden ver "Todo el Equipo" en esta pantalla
+  const availableJuniors = (employees || []).filter(e => e?.role === 'Junior' || e?.role === 'Aprendiz');
+  const myTeamIds = (employees || []).filter(emp => emp?.reviewerId === user?.id).map(e => e.id);
   
-  const myTeamMembers = viewScope === 'ALL' && canSeeAll
+  const myTeamMembers = viewScope === 'ALL' 
      ? availableJuniors 
      : availableJuniors.filter(emp => myTeamIds.includes(emp.id));
 
@@ -449,7 +415,7 @@ const IndicatorsManager = ({ user, tasks, employees, config, measurements, onSav
      const numVal = parseInt(value, 10);
      if (isNaN(numVal) && value !== '') return;
      const measId = `${indId}_${empId}_${selectedPeriod}`;
-     const existing = (measurements || []).find(m => m.id === measId) || { id: measId, indicatorId: indId, assigneeId: empId, period: selectedPeriod, numerator: 0, denominator: 0 };
+     const existing = (measurements || []).find(m => m?.id === measId) || { id: measId, indicatorId: indId, assigneeId: empId, period: selectedPeriod, numerator: 0, denominator: 0 };
      const updated = { ...existing, [field]: value === '' ? 0 : numVal };
      onSaveMeasurement(updated);
   };
@@ -463,12 +429,10 @@ const IndicatorsManager = ({ user, tasks, employees, config, measurements, onSav
                <p className="text-sm text-gray-500 font-medium">Evalúe el desempeño de los profesionales según los KPIs configurados.</p>
              </div>
              <div className="mt-4 md:mt-0 flex flex-col sm:flex-row items-end sm:items-center gap-4">
-               {canSeeAll && (
-                 <div className="flex bg-gray-100 p-1 rounded-lg border border-gray-200">
-                    <button onClick={() => setViewScope('MY_TEAM')} className={`px-4 py-2 text-sm font-bold rounded-md transition-colors ${viewScope === 'MY_TEAM' ? 'bg-white text-[#165399] shadow-sm' : 'text-gray-500 hover:text-gray-800'}`}>Mi Equipo Directo</button>
-                    <button onClick={() => setViewScope('ALL')} className={`px-4 py-2 text-sm font-bold rounded-md transition-colors ${viewScope === 'ALL' ? 'bg-white text-[#165399] shadow-sm' : 'text-gray-500 hover:text-gray-800'}`}>Todo el Equipo</button>
-                 </div>
-               )}
+               <div className="flex bg-gray-100 p-1 rounded-lg border border-gray-200">
+                  <button onClick={() => setViewScope('MY_TEAM')} className={`px-4 py-2 text-sm font-bold rounded-md transition-colors ${viewScope === 'MY_TEAM' ? 'bg-white text-[#165399] shadow-sm' : 'text-gray-500 hover:text-gray-800'}`}>Mi Equipo Directo</button>
+                  <button onClick={() => setViewScope('ALL')} className={`px-4 py-2 text-sm font-bold rounded-md transition-colors ${viewScope === 'ALL' ? 'bg-white text-[#165399] shadow-sm' : 'text-gray-500 hover:text-gray-800'}`}>Todo el Equipo</button>
+               </div>
                <div className="flex items-center gap-3 bg-gray-50 p-2 rounded-lg border border-gray-200">
                  <label className="text-sm font-bold text-[#165399]">Periodo a evaluar:</label>
                  <input type="month" value={selectedPeriod} onChange={(e) => setSelectedPeriod(e.target.value)} className="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#8CC63F] outline-none text-sm font-bold text-gray-700"/>
@@ -484,7 +448,7 @@ const IndicatorsManager = ({ user, tasks, employees, config, measurements, onSav
                    return (
                       <div key={emp.id} className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                          <div className="bg-gray-50 px-4 py-3 border-b border-gray-200 flex items-center gap-3">
-                            <div className="w-8 h-8 bg-[#165399] rounded-full flex items-center justify-center text-white font-black text-xs shadow-sm">{emp.name.charAt(0)}</div>
+                            <div className="w-8 h-8 bg-[#165399] rounded-full flex items-center justify-center text-white font-black text-xs shadow-sm">{emp?.name?.charAt(0) || 'U'}</div>
                             <div>
                                <h3 className="font-bold text-[#165399] text-base leading-tight">{emp.name}</h3>
                                <span className="text-[10px] text-gray-500 uppercase tracking-widest font-black">C.C. {emp.id} - {emp.role}</span>
@@ -503,21 +467,21 @@ const IndicatorsManager = ({ user, tasks, employees, config, measurements, onSav
                                   </tr>
                                </thead>
                                <tbody className="divide-y divide-gray-100">
-                                  {indicators.map(ind => {
+                                  {(indicators || []).map(ind => {
                                      let num = 0; let den = 0; let isCalc = ind.isAuto;
 
                                      if (ind.isAuto) {
-                                        const tasksInMonth = (tasks || []).filter(t => t.assigneeId === emp.id && getTaskMonthYear(t.assignedWeek) === selectedPeriod);
+                                        const tasksInMonth = (tasks || []).filter(t => t?.assigneeId === emp.id && getTaskMonthYear(t?.assignedWeek) === selectedPeriod);
                                         den = tasksInMonth.length;
-                                        num = tasksInMonth.filter(t => t.status === STATUS.CUMPLIDO).length;
+                                        num = tasksInMonth.filter(t => t?.status === STATUS.CUMPLIDO).length;
                                      } else {
                                         const measId = `${ind.id}_${emp.id}_${selectedPeriod}`;
-                                        const rec = (measurements || []).find(m => m.id === measId);
+                                        const rec = (measurements || []).find(m => m?.id === measId);
                                         if (rec) { num = rec.numerator || 0; den = rec.denominator || 0; }
                                      }
 
                                      const result = den === 0 ? 0 : Math.round((num / den) * 100);
-                                     const cumpleMeta = result >= ind.meta;
+                                     const cumpleMeta = result >= (ind.meta || 0);
 
                                      return (
                                         <tr key={ind.id} className="hover:bg-gray-50">
@@ -542,7 +506,7 @@ const IndicatorsManager = ({ user, tasks, employees, config, measurements, onSav
                                               <span className={`text-base font-black px-2 py-1 rounded ${cumpleMeta ? 'text-[#8CC63F] bg-[#f3f9eb]' : 'text-orange-500 bg-orange-50'}`}>{result}%</span>
                                            </td>
                                            <td className="px-2 py-3 text-center">
-                                              <span className="text-xs font-black text-gray-500">{ind.meta}%</span>
+                                              <span className="text-xs font-black text-gray-500">{ind.meta || 0}%</span>
                                            </td>
                                         </tr>
                                      );
@@ -564,8 +528,8 @@ const IndicatorsManager = ({ user, tasks, employees, config, measurements, onSav
 const AdminPanel = ({ config, onUpdateConfig, tasks, currentUser, onUpdateTaskData, onDeleteTask, onImportTasks, onClearAllTasks }) => {
   const [activeTab, setActiveTab] = useState('USERS');
   const [newUser, setNewUser] = useState({ id: '', email: '', name: '', role: 'Junior', reviewerId: '' });
-  const [categoriesState, setCategoriesState] = useState(config.categories || DEFAULT_CATEGORIES);
-  const [indicatorsState, setIndicatorsState] = useState(config.indicators || DEFAULT_INDICATORS);
+  const [categoriesState, setCategoriesState] = useState(config?.categories || DEFAULT_CATEGORIES);
+  const [indicatorsState, setIndicatorsState] = useState(config?.indicators || DEFAULT_INDICATORS);
   
   const [editingUser, setEditingUser] = useState(null);
   const [isEditUserModalOpen, setIsEditUserModalOpen] = useState(false);
@@ -578,15 +542,15 @@ const AdminPanel = ({ config, onUpdateConfig, tasks, currentUser, onUpdateTaskDa
 
   const handleAddUser = (e) => {
     e.preventDefault();
-    if((config.employees || []).find(emp => emp.id === newUser.id)) { alert("Ya existe un usuario con esta cédula."); return; }
-    const updatedEmployees = [...(config.employees || []), { ...newUser, canReview: ['Jefe', 'Coordinador', 'Especializado'].includes(newUser.role) }];
+    if((config?.employees || []).find(emp => emp.id === newUser.id)) { alert("Ya existe un usuario con esta cédula."); return; }
+    const updatedEmployees = [...(config?.employees || []), { ...newUser, canReview: ['Jefe', 'Coordinador', 'Especializado'].includes(newUser.role) }];
     onUpdateConfig({ ...config, employees: updatedEmployees });
     setNewUser({ id: '', email: '', name: '', role: 'Junior', reviewerId: '' });
   };
 
   const handleDeleteUser = (id) => {
-    if(window.confirm("¿Seguro que desea eliminar a este profesional del equipo?")) {
-      onUpdateConfig({ ...config, employees: (config.employees || []).filter(emp => emp.id !== id) });
+    if(window.confirm("¿Seguro que desea eliminar a este profesional?")) {
+      onUpdateConfig({ ...config, employees: (config?.employees || []).filter(emp => emp.id !== id) });
     }
   };
 
@@ -594,8 +558,8 @@ const AdminPanel = ({ config, onUpdateConfig, tasks, currentUser, onUpdateTaskDa
 
   const handleUpdateUser = (e) => {
     e.preventDefault();
-    const updatedEmployees = (config.employees || []).map(emp => 
-      emp.id === editingUser.id ? { ...editingUser, canReview: ['Jefe', 'Coordinador', 'Especializado'].includes(editingUser.role) } : emp
+    const updatedEmployees = (config?.employees || []).map(emp => 
+      emp.id === editingUser?.id ? { ...editingUser, canReview: ['Jefe', 'Coordinador', 'Especializado'].includes(editingUser.role) } : emp
     );
     onUpdateConfig({ ...config, employees: updatedEmployees });
     setIsEditUserModalOpen(false); setEditingUser(null);
@@ -618,7 +582,7 @@ const AdminPanel = ({ config, onUpdateConfig, tasks, currentUser, onUpdateTaskDa
 
   const handleSaveIndicator = (e) => {
     e.preventDefault();
-    const isEdit = indicatorsState.some(i => i.id === newIndicator.id);
+    const isEdit = (indicatorsState || []).some(i => i.id === newIndicator.id);
     let updatedInds;
     if (isEdit) {
       updatedInds = indicatorsState.map(i => i.id === newIndicator.id ? newIndicator : i);
@@ -635,7 +599,7 @@ const AdminPanel = ({ config, onUpdateConfig, tasks, currentUser, onUpdateTaskDa
   const handleDeleteIndicator = (indId) => {
     if (indId === 'ind-auto-1') { alert("Este indicador es fundamental para el sistema y no puede eliminarse, pero sí editarse."); return; }
     if(window.confirm("¿Seguro que desea eliminar este indicador de forma permanente?")) {
-      const updatedInds = indicatorsState.filter(i => i.id !== indId);
+      const updatedInds = (indicatorsState || []).filter(i => i.id !== indId);
       setIndicatorsState(updatedInds);
       onUpdateConfig({ ...config, indicators: updatedInds });
     }
@@ -645,14 +609,14 @@ const AdminPanel = ({ config, onUpdateConfig, tasks, currentUser, onUpdateTaskDa
     const headers = ['ID Tarea', 'Semana de Ejecución', 'Profesional Asignado', 'Categoría', 'Tipo de Documento', 'Título del Entregable', 'Estado Actual', 'Fecha de Asignación', 'Descripción de Gestión', 'Link de Evidencias'];
     const csvRows = [headers.join(',')];
     (tasks || []).forEach(task => {
-      csvRows.push([task.id, `"${task.assignedWeek || ''}"`, `"${getAssigneeName(task.assigneeId, config.employees)}"`, `"${task.category || ''}"`, `"${task.subcategory || 'N/A'}"`, `"${(task.title || '').replace(/"/g, '""')}"`, `"${task.status || ''}"`, `"${task.createdAt || ''}"`, `"${(task.managementDescription || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`, `"${task.evidenceLink || 'N/A'}"`].join(','));
+      csvRows.push([task?.id, `"${task?.assignedWeek || ''}"`, `"${getAssigneeName(task?.assigneeId, config?.employees)}"`, `"${task?.category || ''}"`, `"${task?.subcategory || 'N/A'}"`, `"${(task?.title || '').replace(/"/g, '""')}"`, `"${task?.status || ''}"`, `"${task?.createdAt || ''}"`, `"${(task?.managementDescription || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`, `"${task?.evidenceLink || 'N/A'}"`].join(','));
     });
     const link = document.createElement("a"); link.href = encodeURI("data:text/csv;charset=utf-8,\uFEFF" + csvRows.join('\n')); link.download = `Reporte_General_PYC_${new Date().toLocaleDateString().replace(/\//g, '-')}.csv`;
     document.body.appendChild(link); link.click(); link.remove();
   };
 
   const exportToJSON = () => {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(tasks));
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(tasks || []));
     const downloadAnchorNode = document.createElement('a'); downloadAnchorNode.setAttribute("href", dataStr); downloadAnchorNode.setAttribute("download", `Backup_Entregables_Crudo_${new Date().toLocaleDateString().replace(/\//g, '-')}.json`);
     document.body.appendChild(downloadAnchorNode); downloadAnchorNode.click(); downloadAnchorNode.remove();
   };
@@ -713,7 +677,7 @@ const AdminPanel = ({ config, onUpdateConfig, tasks, currentUser, onUpdateTaskDa
                       <label className="block text-xs font-bold text-gray-700 mb-1">Supervisor</label>
                       <select required value={newUser.reviewerId} onChange={e=>setNewUser({...newUser, reviewerId: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-[#165399] outline-none text-sm">
                         <option value="">Seleccione...</option>
-                        {(config.employees || []).filter(e => e.canReview).map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
+                        {(config?.employees || []).filter(e => e.canReview).map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
                       </select>
                     </div>
                   )}
@@ -727,7 +691,7 @@ const AdminPanel = ({ config, onUpdateConfig, tasks, currentUser, onUpdateTaskDa
                     <tr><th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Cédula</th><th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Nombre</th><th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Correo (Firebase Auth)</th><th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Rol</th><th className="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase">Acciones</th></tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {(config.employees || []).map(emp => (
+                    {(config?.employees || []).map(emp => (
                       <tr key={emp.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{emp.id}</td><td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{emp.name}</td><td className="px-6 py-4 whitespace-nowrap text-sm text-[#165399] font-bold">{emp.email || 'SIN CORREO'}</td><td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700"><span className="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs font-bold">{emp.role}</span></td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -784,7 +748,7 @@ const AdminPanel = ({ config, onUpdateConfig, tasks, currentUser, onUpdateTaskDa
                           <p className="text-xs text-gray-600"><span className="font-bold text-[#165399]">Num:</span> {ind.numVar}</p>
                           <p className="text-xs text-gray-600"><span className="font-bold text-[#165399]">Den:</span> {ind.denVar}</p>
                           <p className="text-xs text-gray-600"><span className="font-bold text-[#165399]">Frecuencia:</span> {ind.periodicity || 'Mensual'}</p>
-                          <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-100">
+                          <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-200">
                              <span className="text-xs font-black text-[#8CC63F]">Meta: {ind.meta}%</span>
                              <div className="flex gap-1">
                                 <button onClick={() => openEditIndicator(ind)} className="text-[#165399] hover:text-[#114078] bg-blue-100 p-1.5 rounded" title="Editar"><Icon name="edit" className="w-3 h-3"/></button>
@@ -866,7 +830,7 @@ const AdminPanel = ({ config, onUpdateConfig, tasks, currentUser, onUpdateTaskDa
                   <label className="block text-sm font-bold text-[#165399] mb-1">Supervisor a Cargo</label>
                   <select required value={editingUser.reviewerId} onChange={e => setEditingUser({...editingUser, reviewerId: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#165399] outline-none">
                     <option value="">Seleccione...</option>
-                    {(config.employees || []).filter(e => e.canReview && e.id !== editingUser.id).map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
+                    {(config?.employees || []).filter(e => e.canReview && e.id !== editingUser.id).map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
                   </select>
                 </div>
               )}
@@ -882,7 +846,7 @@ const AdminPanel = ({ config, onUpdateConfig, tasks, currentUser, onUpdateTaskDa
             <div className="p-3 bg-orange-50 border border-orange-200 rounded text-xs text-orange-800 font-bold mb-4">⚠️ ATENCIÓN: Modificar estados o IDs crudos puede romper la lógica.</div>
             <div className="grid grid-cols-2 gap-4">
               <div><label className="block text-xs font-bold text-gray-700 mb-1">ID</label><input type="text" value={dbTaskEdit.id} readOnly className="w-full px-3 py-1 border bg-gray-100 text-xs" /></div>
-              <div><label className="block text-xs font-bold text-gray-700 mb-1">Cédula</label><input type="text" value={dbTaskEdit.assigneeId} onChange={e => setDbTaskEdit({...dbTaskEdit, assigneeId: e.target.value})} className="w-full px-3 py-1 border text-xs" /></div>
+              <div><label className="block text-xs font-bold text-gray-700 mb-1">Cédula (assigneeId)</label><input type="text" value={dbTaskEdit.assigneeId} onChange={e => setDbTaskEdit({...dbTaskEdit, assigneeId: e.target.value})} className="w-full px-3 py-1 border text-xs" /></div>
               <div className="col-span-2"><label className="block text-xs font-bold text-gray-700 mb-1">Título</label><input type="text" value={dbTaskEdit.title} onChange={e => setDbTaskEdit({...dbTaskEdit, title: e.target.value})} className="w-full px-3 py-1 border text-xs" /></div>
               <div><label className="block text-xs font-bold text-gray-700 mb-1">Semana</label><input type="text" value={dbTaskEdit.assignedWeek} onChange={e => setDbTaskEdit({...dbTaskEdit, assignedWeek: e.target.value})} className="w-full px-3 py-1 border text-xs" /></div>
               <div><label className="block text-xs font-bold text-gray-700 mb-1">Estado</label><select value={dbTaskEdit.status} onChange={e => setDbTaskEdit({...dbTaskEdit, status: e.target.value})} className="w-full px-3 py-1 border text-xs">{Object.values(STATUS).map(s => <option key={s} value={s}>{s}</option>)}</select></div>
@@ -892,7 +856,7 @@ const AdminPanel = ({ config, onUpdateConfig, tasks, currentUser, onUpdateTaskDa
         )}
       </Modal>
 
-      <Modal isOpen={isIndicatorModalOpen} onClose={() => setIsIndicatorModalOpen(false)} title={newIndicator.id && newIndicator.id !== '' && !newIndicator.id.startsWith('ind-man-') ? "Editar Indicador Automático" : "Crear / Editar Indicador"}>
+      <Modal isOpen={isIndicatorModalOpen} onClose={() => setIsIndicatorModalOpen(false)} title={newIndicator?.isAuto ? "Editar Indicador Automático" : "Crear / Editar Indicador"}>
         <form onSubmit={handleSaveIndicator} className="space-y-4">
           <div className="p-3 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800 font-bold mb-4">Los indicadores se calculan como porcentaje: <code>(Numerador / Denominador) * 100</code></div>
           
@@ -996,11 +960,11 @@ const JuniorDashboard = ({ user, tasks, categories, onAddTask, onUpdateTaskStatu
     setIsRescheduleModalOpen(false); setActiveTask(null);
   };
 
-  const myTasks = (tasks || []).filter(t => t.assigneeId === user.id);
+  const myTasks = (tasks || []).filter(t => t?.assigneeId === user.id);
   const groupedTasks = groupTasksByWeek(myTasks);
   
   const totalTasks = myTasks.length;
-  const cumplidosCount = myTasks.filter(t => t.status === STATUS.CUMPLIDO).length;
+  const cumplidosCount = myTasks.filter(t => t?.status === STATUS.CUMPLIDO).length;
   const pendientesCount = totalTasks - cumplidosCount;
   const complianceRate = totalTasks > 0 ? Math.round((cumplidosCount / totalTasks) * 100) : 0;
 
@@ -1016,48 +980,21 @@ const JuniorDashboard = ({ user, tasks, categories, onAddTask, onUpdateTaskStatu
          <div className="flex-1 w-full">
             <h3 className="text-lg font-black text-[#165399] mb-4">Mi Nivel de Cumplimiento</h3>
             <div className="grid grid-cols-3 gap-4">
-               <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 text-center flex flex-col justify-center">
-                 <p className="text-3xl font-black text-gray-700">{totalTasks}</p>
-                 <p className="text-[10px] font-bold text-gray-500 uppercase mt-1">Total Asignados</p>
-               </div>
-               <div className="bg-[#f3f9eb] p-4 rounded-lg border border-[#8CC63F] text-center flex flex-col justify-center">
-                 <p className="text-3xl font-black text-[#8CC63F]">{cumplidosCount}</p>
-                 <p className="text-[10px] font-bold text-[#8CC63F] uppercase mt-1">Cumplidos</p>
-               </div>
-               <div className="bg-[#165399] p-4 rounded-lg border border-[#114078] text-center text-white flex flex-col justify-center shadow-inner">
-                 <p className="text-3xl font-black">{complianceRate}%</p>
-                 <p className="text-[10px] font-bold uppercase opacity-80 mt-1">Efectividad</p>
-               </div>
+               <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 text-center"><p className="text-3xl font-black text-gray-700">{totalTasks}</p><p className="text-[10px] font-bold text-gray-500 uppercase mt-1">Asignados</p></div>
+               <div className="bg-[#f3f9eb] p-4 rounded-lg border border-[#8CC63F] text-center"><p className="text-3xl font-black text-[#8CC63F]">{cumplidosCount}</p><p className="text-[10px] font-bold text-[#8CC63F] uppercase mt-1">Cumplidos</p></div>
+               <div className="bg-[#165399] p-4 rounded-lg border border-[#114078] text-center text-white"><p className="text-3xl font-black">{complianceRate}%</p><p className="text-[10px] font-bold uppercase opacity-80 mt-1">Efectividad</p></div>
             </div>
          </div>
          <div className="w-full md:w-1/3 h-[180px] flex items-center justify-center relative">
             {totalTasks > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={pieData} innerRadius={50} outerRadius={80} dataKey="value" stroke="none">
-                    {pieData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.fill} />)}
-                    <Label 
-                      value={`${complianceRate}%`} position="center" 
-                      fill="#165399" fontSize={24} fontWeight="black" 
-                    />
-                  </Pie>
-                  <RechartsTooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <p className="text-sm text-gray-400 font-bold italic">No hay entregables asignados</p>
-            )}
+              <ResponsiveContainer width="100%" height="100%"><PieChart><Pie data={pieData} innerRadius={50} outerRadius={80} dataKey="value" stroke="none">{pieData.map((e, i) => <Cell key={i} fill={e.fill} />)}<Label value={`${complianceRate}%`} position="center" fill="#165399" fontSize={24} fontWeight="black" /></Pie><RechartsTooltip /></PieChart></ResponsiveContainer>
+            ) : (<p className="text-sm text-gray-400 font-bold italic">No hay entregables</p>)}
          </div>
       </div>
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-4 rounded-xl shadow-sm border border-[#165399] border-l-8 gap-4">
-        <div>
-          <h2 className="text-xl font-black text-[#165399]">Mis Entregables Asignados</h2>
-          <p className="text-sm text-gray-500 font-medium">Gestione el reporte y envío a revisión de sus productos.</p>
-        </div>
-        <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 bg-[#8CC63F] hover:bg-[#78b030] text-white px-4 py-2 rounded-lg font-bold transition-colors shadow-md">
-          <Icon name="plus" className="w-5 h-5" /> Auto-Asignar Entregable
-        </button>
+        <div><h2 className="text-xl font-black text-[#165399]">Mis Entregables Asignados</h2><p className="text-sm text-gray-500 font-medium">Gestione el reporte y revisión.</p></div>
+        <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 bg-[#8CC63F] hover:bg-[#78b030] text-white px-4 py-2 rounded-lg font-bold"><Icon name="plus" className="w-5 h-5" /> Auto-Asignar</button>
       </div>
 
       {Object.keys(groupedTasks).length === 0 ? (
@@ -1065,69 +1002,35 @@ const JuniorDashboard = ({ user, tasks, categories, onAddTask, onUpdateTaskStatu
       ) : (
         Object.entries(groupedTasks).map(([weekLabel, weekTasks]) => (
           <div key={weekLabel} className="mb-8 bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-            <h3 className="text-lg font-black text-[#165399] mb-4 border-b border-gray-100 pb-3 flex items-center gap-2">
-              <Icon name="clock" className="w-5 h-5 text-[#8CC63F]" /> {weekLabel}
-            </h3>
+            <h3 className="text-lg font-black text-[#165399] mb-4 border-b border-gray-100 pb-3 flex items-center gap-2"><Icon name="clock" className="w-5 h-5 text-[#8CC63F]" /> {weekLabel}</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {weekTasks.map(task => (
-                <div key={task.id} className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow flex flex-col overflow-hidden">
+                <div key={task?.id} className="bg-white border border-gray-200 rounded-xl shadow-sm flex flex-col overflow-hidden">
                   <div className="p-4 flex-1 flex flex-col">
-                    <div className="flex justify-between items-start mb-2">
-                      <Badge status={task.status} />
-                      <span className="text-[10px] font-black text-[#165399] bg-blue-50 px-2 py-1 rounded truncate max-w-[120px] border border-blue-100" title={task.category}>{task.category}</span>
-                    </div>
-                    <h4 className="font-bold text-gray-800 text-sm mb-1">{task.title}</h4>
-                    {task.subcategory && <p className="text-xs text-[#8CC63F] font-bold mb-3">{task.subcategory}</p>}
-                    
-                    {task.comments && task.comments.length > 0 && (
+                    <div className="flex justify-between items-start mb-2"><Badge status={task?.status} /><span className="text-[10px] font-black text-[#165399] bg-blue-50 px-2 py-1 rounded truncate max-w-[120px]">{task?.category}</span></div>
+                    <h4 className="font-bold text-gray-800 text-sm mb-1">{task?.title}</h4>
+                    {task?.subcategory && <p className="text-xs text-[#8CC63F] font-bold mb-3">{task.subcategory}</p>}
+                    {task?.comments && task.comments.length > 0 && (
                        (() => {
-                          const style = task.status === STATUS.CUMPLIDO 
-                             ? { bg: "bg-[#f3f9eb]", border: "border-[#8CC63F]", title: "text-[#8CC63F]", icon: "text-[#8CC63F]", text: "text-green-800" }
-                             : (task.status === STATUS.NO_CUMPLIDO || task.status === STATUS.NO_REPORTADO)
-                             ? { bg: "bg-red-50", border: "border-red-200", title: "text-red-700", icon: "text-red-600", text: "text-red-800" }
-                             : { bg: "bg-yellow-50", border: "border-yellow-200", title: "text-yellow-700", icon: "text-yellow-600", text: "text-yellow-800" };
-
+                          const style = task.status === STATUS.CUMPLIDO ? { bg: "bg-[#f3f9eb]", border: "border-[#8CC63F]", title: "text-[#8CC63F]", icon: "text-[#8CC63F]", text: "text-green-800" } : (task.status === STATUS.NO_CUMPLIDO || task.status === STATUS.NO_REPORTADO) ? { bg: "bg-red-50", border: "border-red-200", title: "text-red-700", icon: "text-red-600", text: "text-red-800" } : { bg: "bg-yellow-50", border: "border-yellow-200", title: "text-yellow-700", icon: "text-yellow-600", text: "text-yellow-800" };
                           return (
                              <div className={`mt-2 mb-3 ${style.bg} p-3 rounded-lg border ${style.border}`}>
-                                <p className={`text-[10px] font-black ${style.title} uppercase mb-1 flex items-center gap-1`}>
-                                   <Icon name="alert" className={`w-3 h-3 ${style.icon}`}/> Feedback de {task.comments[task.comments.length - 1].author}:
-                                </p>
+                                <p className={`text-[10px] font-black ${style.title} uppercase mb-1 flex items-center gap-1`}><Icon name="alert" className={`w-3 h-3 ${style.icon}`}/> Feedback de {task.comments[task.comments.length - 1].author}:</p>
                                 <p className={`text-xs ${style.text} font-medium line-clamp-2`}>{task.comments[task.comments.length - 1].text}</p>
                              </div>
                           );
                        })()
                     )}
-
-                    <div className="flex items-center text-xs text-gray-500 font-medium gap-1 mt-auto pt-3 border-t border-gray-50">
-                      <Icon name="clock" className="w-4 h-4 text-[#AAB4C2]" />
-                      Límite: {task.deadlineInfo}
-                      {(task.continuedCount > 0) && <span className="ml-2 font-bold text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded border border-orange-200">Semana {task.continuedCount + 1}</span>}
-                    </div>
+                    <div className="flex items-center text-xs text-gray-500 font-medium gap-1 mt-auto pt-3 border-t border-gray-50"><Icon name="clock" className="w-4 h-4 text-[#AAB4C2]" /> Límite: {task?.deadlineInfo}{(task?.continuedCount > 0) && <span className="ml-2 font-bold text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded border border-orange-200">Sem. {task.continuedCount + 1}</span>}</div>
                   </div>
                   <div className="bg-gray-50 px-4 py-3 border-t border-gray-200 flex flex-col gap-2">
                     <div className="flex gap-2 w-full">
-                      {(task.status === STATUS.ASIGNADO || task.status === STATUS.NO_REPORTADO) && (
-                        <button onClick={() => onUpdateTaskStatus(task.id, STATUS.EN_PROGRESO)} className="text-xs w-full bg-white border border-[#165399] text-[#165399] hover:bg-blue-50 px-3 py-2 rounded-lg font-bold shadow-sm transition-colors">
-                          {task.status === STATUS.NO_REPORTADO ? 'Iniciar Atrasado' : 'Iniciar Trabajo'}
-                        </button>
-                      )}
-                      {(task.status === STATUS.EN_PROGRESO || task.status === STATUS.CON_OBSERVACIONES) && (
-                        <button onClick={() => openReportModal(task)} className="text-xs w-full bg-[#165399] hover:bg-[#114078] text-white px-3 py-2 rounded-lg font-bold shadow-sm transition-colors">
-                          Redactar Report y Enviar
-                        </button>
-                      )}
-                      {(task.status === STATUS.EN_REVISION || task.status === STATUS.SOLICITUD_CONTINUIDAD) && (
-                        <button onClick={() => openReportModal(task)} className="text-xs w-full bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 px-3 py-2 rounded-lg font-bold flex items-center justify-center gap-1 shadow-sm transition-colors">
-                          <Icon name="edit" className="w-3 h-3" /> Modificar Reporte
-                        </button>
-                      )}
+                      {(task?.status === STATUS.ASIGNADO || task?.status === STATUS.NO_REPORTADO) && (<button onClick={() => onUpdateTaskStatus(task.id, STATUS.EN_PROGRESO)} className="text-xs w-full bg-white border border-[#165399] text-[#165399] px-3 py-2 rounded-lg font-bold">{task.status === STATUS.NO_REPORTADO ? 'Iniciar Atrasado' : 'Iniciar Trabajo'}</button>)}
+                      {(task?.status === STATUS.EN_PROGRESO || task?.status === STATUS.CON_OBSERVACIONES) && (<button onClick={() => openReportModal(task)} className="text-xs w-full bg-[#165399] text-white px-3 py-2 rounded-lg font-bold">Redactar Reporte</button>)}
+                      {(task?.status === STATUS.EN_REVISION || task?.status === STATUS.SOLICITUD_CONTINUIDAD) && (<button onClick={() => openReportModal(task)} className="text-xs w-full bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded-lg font-bold flex justify-center gap-1"><Icon name="edit" className="w-3 h-3" /> Modificar Reporte</button>)}
                     </div>
                     <div className="flex gap-2 w-full">
-                      {task.status !== STATUS.CUMPLIDO && (
-                        <button onClick={() => { setActiveTask(task); setRescheduleWeek(task.assignedWeek); setIsRescheduleModalOpen(true); }} className="text-xs flex-1 bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 px-3 py-2 rounded-lg font-bold flex items-center justify-center gap-1 shadow-sm transition-colors">
-                          <Icon name="clock" className="w-3 h-3" /> Reprogramar
-                        </button>
-                      )}
+                      {task?.status !== STATUS.CUMPLIDO && (<button onClick={() => { setActiveTask(task); setRescheduleWeek(task.assignedWeek); setIsRescheduleModalOpen(true); }} className="text-xs flex-1 bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded-lg font-bold flex justify-center gap-1"><Icon name="clock" className="w-3 h-3" /> Reprogramar</button>)}
                     </div>
                   </div>
                 </div>
@@ -1139,96 +1042,33 @@ const JuniorDashboard = ({ user, tasks, categories, onAddTask, onUpdateTaskStatu
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Auto-Asignar Nuevo Entregable">
         <form onSubmit={handleCreateTask} className="space-y-4">
-          <div>
-            <label className="block text-sm font-bold text-[#165399] mb-1">Título del Producto / Entregable <span className="text-red-500">*</span></label>
-            <input required type="text" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#165399] outline-none" />
+          <div><label className="block text-sm font-bold text-[#165399] mb-1">Título <span className="text-red-500">*</span></label><input required type="text" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full px-3 py-2 border rounded-lg outline-none" /></div>
+          <div className="grid grid-cols-2 gap-4">
+            <div><label className="block text-sm font-bold text-[#165399] mb-1">Categoría <span className="text-red-500">*</span></label><select required value={formData.categoryId} onChange={e => setFormData({...formData, categoryId: e.target.value ? parseInt(e.target.value) : '', subcategory: ''})} className="w-full px-3 py-2 border rounded-lg outline-none"><option value="">Seleccione...</option>{(categories||[]).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
+            {formData.categoryId === 1 && (<div><label className="block text-sm font-bold text-[#165399] mb-1">Tipo <span className="text-red-500">*</span></label><select required value={formData.subcategory} onChange={e => setFormData({...formData, subcategory: e.target.value})} className="w-full px-3 py-2 border rounded-lg outline-none"><option value="">Seleccione...</option>{selectedCategory?.subcategories?.map((s, idx) => <option key={idx} value={s.name}>{s.name}</option>)}</select></div>)}
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-bold text-[#165399] mb-1">Categoría <span className="text-red-500">*</span></label>
-              <select required value={formData.categoryId} onChange={e => setFormData({...formData, categoryId: e.target.value ? parseInt(e.target.value) : '', subcategory: ''})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#165399] outline-none">
-                <option value="">Seleccione una categoría...</option>
-                {(categories||[]).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-              </select>
-            </div>
-            {formData.categoryId === 1 && (
-              <div>
-                <label className="block text-sm font-bold text-[#165399] mb-1">Tipo de Documento <span className="text-red-500">*</span></label>
-                <select required value={formData.subcategory} onChange={e => setFormData({...formData, subcategory: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#165399] outline-none">
-                  <option value="">Seleccione...</option>
-                  {selectedCategory?.subcategories?.map((s, idx) => <option key={idx} value={s.name}>{s.name} {s.maxWeeks ? `(Máx. ${s.maxWeeks} sem)` : ''}</option>)}
-                </select>
-              </div>
-            )}
-          </div>
-          <div>
-            <label className="block text-sm font-bold text-[#165399] mb-1">Semana de Ejecución <span className="text-red-500">*</span></label>
-            <input type="text" value={formData.week} readOnly className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600 font-bold outline-none" />
-          </div>
-          <div>
-            <label className="block text-sm font-bold text-[#165399] mb-1">Descripción / Objetivos Específicos</label>
-            <textarea rows="3" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#165399] outline-none"></textarea>
-          </div>
-          <div className="pt-4 border-t border-gray-200 flex justify-end gap-2">
-            <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg font-bold transition-colors">Cancelar</button>
-            <button type="submit" className="px-4 py-2 bg-[#8CC63F] text-white rounded-lg hover:bg-[#78b030] font-bold transition-colors shadow-sm">Asignar Entregable</button>
-          </div>
+          <div><label className="block text-sm font-bold text-[#165399] mb-1">Semana Ejecución <span className="text-red-500">*</span></label><input type="text" value={formData.week} readOnly className="w-full px-3 py-2 border rounded-lg bg-gray-50 text-gray-600 font-bold outline-none" /></div>
+          <div className="pt-4 border-t flex justify-end gap-2"><button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 bg-gray-100 rounded-lg font-bold">Cancelar</button><button type="submit" className="px-4 py-2 bg-[#8CC63F] text-white rounded-lg font-bold">Asignar</button></div>
         </form>
       </Modal>
 
-      <Modal isOpen={reportModalOpen} onClose={() => setReportModalOpen(false)} title="Reportar Gestión del Entregable">
+      <Modal isOpen={reportModalOpen} onClose={() => setReportModalOpen(false)} title="Reportar Gestión">
         <form onSubmit={handleSubmitReport} className="space-y-4">
-          {errorMsg && <div className="p-3 bg-red-50 text-red-700 rounded-lg text-sm border border-red-200 font-bold shadow-sm">{errorMsg}</div>}
-          
-          <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 shadow-sm">
-            <p className="text-sm font-black text-[#165399]">{activeTask?.title}</p>
-            {activeTask?.subcategory && <p className="text-xs text-[#8CC63F] font-bold mt-1">{activeTask?.subcategory}</p>}
+          {errorMsg && <div className="p-3 bg-red-50 text-red-700 rounded-lg text-sm font-bold">{errorMsg}</div>}
+          <div><label className="block text-sm font-bold text-[#165399] mb-1">Descripción <span className="text-red-500">*</span></label><textarea required rows="4" value={reportData.description} onChange={e => setReportData({...reportData, description: e.target.value})} className="w-full px-3 py-2 border rounded-lg outline-none"></textarea></div>
+          <div><label className="block text-sm font-bold text-[#165399] mb-1">Enlace Evidencias <span className="text-red-500">*</span></label><input required type="url" value={reportData.link} onChange={e => setReportData({...reportData, link: e.target.value})} className="w-full px-3 py-2 border rounded-lg outline-none" /></div>
+          <div className={`p-4 rounded-xl border ${!canRequestContinuation ? 'bg-red-50 border-red-200' : 'bg-gray-50'}`}>
+             <label className="flex items-center gap-2 cursor-pointer"><input type="checkbox" checked={requestContinuation} onChange={(e) => setRequestContinuation(e.target.checked)} disabled={!canRequestContinuation} className="w-4 h-4 text-[#165399] rounded" /><span className={`text-sm font-bold ${!canRequestContinuation ? 'text-red-700' : 'text-gray-700'}`}>Solicitar continuar entregable próxima semana</span></label>
+             {!canRequestContinuation && (<p className="text-xs text-red-600 mt-2 ml-6 font-medium">Límite alcanzado.</p>)}
           </div>
-
-          <div>
-            <label className="block text-sm font-bold text-[#165399] mb-1">Descripción de la Gestión Realizada <span className="text-red-500">*</span></label>
-            <textarea required rows="4" value={reportData.description} onChange={e => setReportData({...reportData, description: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#165399] outline-none"></textarea>
-          </div>
-
-          <div>
-            <label className="block text-sm font-bold text-[#165399] mb-1">Enlace de Soportes/Evidencias <span className="text-red-500">*</span></label>
-            <input required type="url" value={reportData.link} onChange={e => setReportData({...reportData, link: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#165399] outline-none" />
-          </div>
-
-          <div className={`p-4 rounded-xl border ${!canRequestContinuation ? 'bg-red-50 border-red-200' : 'bg-gray-50 border-gray-200'}`}>
-             <label className="flex items-center gap-2 cursor-pointer">
-               <input type="checkbox" checked={requestContinuation} onChange={(e) => setRequestContinuation(e.target.checked)} disabled={!canRequestContinuation} className="w-4 h-4 text-[#165399] rounded border-gray-300 focus:ring-[#165399]" />
-               <span className={`text-sm font-bold ${!canRequestContinuation ? 'text-red-700' : 'text-gray-700'}`}>Solicitar continuar con el entregable la próxima semana</span>
-             </label>
-             {!canRequestContinuation && (
-               <p className="text-xs text-red-600 mt-2 ml-6 font-medium">No es posible solicitar continuidad. Límite alcanzado.</p>
-             )}
-          </div>
-
-          <div className="pt-4 border-t border-gray-200 flex justify-end gap-2">
-            <button type="button" onClick={() => setReportModalOpen(false)} className="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg font-bold transition-colors">Cancelar</button>
-            <button type="submit" className="px-4 py-2 bg-[#165399] text-white rounded-lg hover:bg-[#114078] font-bold transition-colors shadow-sm">Guardar y Enviar</button>
-          </div>
+          <div className="pt-4 flex justify-end gap-2"><button type="button" onClick={() => setReportModalOpen(false)} className="px-4 py-2 bg-gray-100 rounded-lg font-bold">Cancelar</button><button type="submit" className="px-4 py-2 bg-[#165399] text-white rounded-lg font-bold">Enviar</button></div>
         </form>
       </Modal>
 
-      <Modal isOpen={isRescheduleModalOpen} onClose={() => setIsRescheduleModalOpen(false)} title="Reprogramar Entregable">
-        <form onSubmit={handleReschedule} className="space-y-4">
-          <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 shadow-sm mb-4">
-            <p className="text-sm font-black text-[#165399]">{activeTask?.title}</p>
-            <p className="text-xs font-bold text-gray-600 mt-1">Semana actual: {activeTask?.assignedWeek}</p>
-          </div>
-          <div>
-            <label className="block text-sm font-bold text-[#165399] mb-1">Seleccione la nueva semana de ejecución <span className="text-red-500">*</span></label>
-            <select required value={rescheduleWeek} onChange={e => setRescheduleWeek(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#165399] outline-none">
-              <option value="">Seleccione...</option>
-              {upcomingWeeks.map(w => <option key={w} value={w}>{w}</option>)}
-            </select>
-          </div>
-          <div className="pt-4 border-t border-gray-200 flex justify-end gap-2">
-            <button type="button" onClick={() => setIsRescheduleModalOpen(false)} className="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg font-bold transition-colors">Cancelar</button>
-            <button type="submit" className="px-4 py-2 bg-[#165399] text-white rounded-lg hover:bg-[#114078] font-bold transition-colors shadow-sm">Guardar Reprogramación</button>
-          </div>
+      <Modal isOpen={isRescheduleModalOpen} onClose={() => setIsRescheduleModalOpen(false)} title="Reprogramar">
+        <form onSubmit={(e) => { e.preventDefault(); onUpdateTaskData(activeTask.id, { assignedWeek: rescheduleWeek }); setIsRescheduleModalOpen(false); setActiveTask(null); }} className="space-y-4">
+          <div><label className="block text-sm font-bold text-[#165399] mb-1">Nueva semana <span className="text-red-500">*</span></label><select required value={rescheduleWeek} onChange={e => setRescheduleWeek(e.target.value)} className="w-full px-3 py-2 border rounded-lg"><option value="">Seleccione...</option>{upcomingWeeks.map(w => <option key={w} value={w}>{w}</option>)}</select></div>
+          <div className="pt-4 flex justify-end gap-2"><button type="button" onClick={() => setIsRescheduleModalOpen(false)} className="px-4 py-2 bg-gray-100 rounded-lg font-bold">Cancelar</button><button type="submit" className="px-4 py-2 bg-[#165399] text-white rounded-lg font-bold">Reprogramar</button></div>
         </form>
       </Modal>
     </div>
@@ -1269,15 +1109,15 @@ const App = () => {
     const unsubConfig = onSnapshot(configRef, (docSnap) => {
       if (docSnap.exists()) {
         const dbData = docSnap.data();
-        const mergedEmployees = (dbData.employees || []).map(dbEmp => {
+        const mergedEmployees = (dbData?.employees || []).map(dbEmp => {
            if (!dbEmp.email) {
               const defEmp = DEFAULT_EMPLOYEES.find(d => d.id === dbEmp.id);
               return { ...dbEmp, email: defEmp ? defEmp.email : '' };
            }
            return dbEmp;
         });
-        const mergedIndicators = dbData.indicators && dbData.indicators.length > 0 ? dbData.indicators : DEFAULT_INDICATORS;
-        const mergedCategories = dbData.categories && dbData.categories.length > 0 ? dbData.categories : DEFAULT_CATEGORIES;
+        const mergedIndicators = dbData?.indicators && dbData.indicators.length > 0 ? dbData.indicators : DEFAULT_INDICATORS;
+        const mergedCategories = dbData?.categories && dbData.categories.length > 0 ? dbData.categories : DEFAULT_CATEGORIES;
         
         setAppConfig({ ...dbData, employees: mergedEmployees, indicators: mergedIndicators, categories: mergedCategories });
       } else {
@@ -1298,10 +1138,10 @@ const App = () => {
     if (tasks.length === 0 || !isDbReady || !currentUser) return;
     const checkOverdue = async () => {
       const now = new Date();
-      const myOverdueTasks = tasks.filter(t => t.assigneeId === currentUser.id && (t.status === STATUS.ASIGNADO || t.status === STATUS.EN_PROGRESO) && t.assignedWeek);
+      const myOverdueTasks = tasks.filter(t => t?.assigneeId === currentUser.id && (t?.status === STATUS.ASIGNADO || t?.status === STATUS.EN_PROGRESO) && t?.assignedWeek);
       
       for (const t of myOverdueTasks) {
-        if (!t.assignedWeek || typeof t.assignedWeek !== 'string') continue;
+        if (!t?.assignedWeek || typeof t.assignedWeek !== 'string') continue;
         const match = t.assignedWeek.match(/al (\d{2})\/(\d{2})\/(\d{2})/);
         if (match) {
            const day = parseInt(match[1], 10); const month = parseInt(match[2], 10) - 1; const year = parseInt(match[3], 10) + 2000;
@@ -1318,7 +1158,7 @@ const App = () => {
 
   const pendingReviewsCount = useMemo(() => {
     if (!currentUser || !currentUser.canReview) return 0;
-    return tasks.filter(t => t.reviewerId === currentUser.id && (t.status === STATUS.EN_REVISION || t.status === STATUS.SOLICITUD_CONTINUIDAD)).length;
+    return tasks.filter(t => t?.reviewerId === currentUser.id && (t?.status === STATUS.EN_REVISION || t?.status === STATUS.SOLICITUD_CONTINUIDAD)).length;
   }, [tasks, currentUser]);
 
   const handleLogin = async (email, password) => {
@@ -1368,7 +1208,7 @@ const App = () => {
             <h2 className="text-xs font-bold text-[#8CC63F] uppercase tracking-widest">Planeación y Calidad</h2>
           </div>
           
-          {(currentUser.role === 'Coordinador' || currentUser.role === 'Jefe') && (
+          {(currentUser?.role === 'Coordinador' || currentUser?.role === 'Jefe') && (
             <div className="flex bg-[#114078] p-1 rounded-lg border border-blue-800 shadow-inner overflow-hidden mx-auto md:mx-0">
               <button onClick={() => setDashboardMode('TRACKING')} className={`px-4 py-1.5 text-sm font-bold transition-colors ${dashboardMode === 'TRACKING' ? 'bg-[#8CC63F] text-white rounded' : 'text-blue-200 hover:text-white'}`}>Seguimiento</button>
               <button onClick={() => setDashboardMode('ADMIN')} className={`px-4 py-1.5 text-sm font-bold flex items-center gap-1 transition-colors ${dashboardMode === 'ADMIN' ? 'bg-[#8CC63F] text-white rounded' : 'text-blue-200 hover:text-white'}`}>
@@ -1379,11 +1219,11 @@ const App = () => {
 
           <div className="flex items-center gap-4 bg-[#114078] px-4 py-2 rounded-xl shadow-inner border border-blue-800">
             <div className="text-right hidden sm:block">
-              <p className="text-sm font-bold">{currentUser.name}</p>
-              <p className="text-[10px] text-[#AAB4C2] font-black uppercase tracking-wider">{currentUser.role}</p>
+              <p className="text-sm font-bold">{currentUser?.name}</p>
+              <p className="text-[10px] text-[#AAB4C2] font-black uppercase tracking-wider">{currentUser?.role}</p>
             </div>
             <div className="w-10 h-10 bg-[#8CC63F] rounded-full flex items-center justify-center text-white font-black text-lg shadow-md border-2 border-white">
-              {currentUser.name.charAt(0)}
+              {currentUser?.name?.charAt(0) || 'U'}
             </div>
             <button onClick={handleLogout} className="ml-2 text-xs bg-red-600 hover:bg-red-700 px-3 py-2 rounded-lg font-bold transition-colors shadow-sm">
               Salir
@@ -1400,9 +1240,9 @@ const App = () => {
             <div className="mb-6 flex gap-4">
               <div className="flex-1 bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex items-center gap-4">
                 <div className="p-3 bg-blue-50 rounded-lg border border-blue-100"><Icon name="user" className="w-6 h-6 text-[#165399]" /></div>
-                <div><p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Perfil Actual</p><p className="text-lg font-black text-[#165399]">{currentUser.role}</p></div>
+                <div><p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Perfil Actual</p><p className="text-lg font-black text-[#165399]">{currentUser?.role}</p></div>
               </div>
-              {currentUser.canReview && (
+              {currentUser?.canReview && (
                 <div className="flex-1 bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex items-center gap-4">
                   <div className="p-3 bg-green-50 rounded-lg border border-green-100"><Icon name="clock" className="w-6 h-6 text-[#8CC63F]" /></div>
                   <div><p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Pendientes de Revisión</p><p className="text-lg font-black text-[#8CC63F]">{pendingReviewsCount} Entregables</p></div>
@@ -1410,7 +1250,7 @@ const App = () => {
               )}
             </div>
 
-            {currentUser.canReview ? (
+            {currentUser?.canReview ? (
               <ReviewerDashboard user={currentUser} tasks={tasks} categories={appConfig.categories || DEFAULT_CATEGORIES} config={appConfig} employees={appConfig.employees} measurements={measurements} onAddTask={handleAddTask} onUpdateTaskStatus={handleUpdateTaskStatus} onAddComment={handleAddComment} onUpdateTaskData={handleUpdateTaskData} onDeleteTask={handleDeleteTask} onSaveMeasurement={handleSaveMeasurement} />
             ) : (
               <JuniorDashboard user={currentUser} tasks={tasks} categories={appConfig.categories || DEFAULT_CATEGORIES} onAddTask={handleAddTask} onUpdateTaskStatus={handleUpdateTaskStatus} onUpdateTaskData={handleUpdateTaskData} onDeleteTask={handleDeleteTask} />
