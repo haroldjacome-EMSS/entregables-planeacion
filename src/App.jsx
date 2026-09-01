@@ -197,7 +197,7 @@ const Icon = ({ name, className }) => {
     alert: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>,
     download: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>,
     upload: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>,
-    settings: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>,
+    settings: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>,
     target: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>,
     activity: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
   };
@@ -282,10 +282,16 @@ const DashboardMetrics = ({ tasks, employees }) => {
   const noCumplidos = tasks?.filter(t => t.status === STATUS.NO_CUMPLIDO || t.status === STATUS.NO_REPORTADO).length || 0;
   const enRevisionYOtros = total - cumplidos - noCumplidos;
 
+  const groupedStatusCounts = {
+    'Cumplidos': cumplidos,
+    'En Revisión / Pendientes': enRevisionYOtros,
+    'No Cumplido': noCumplidos
+  };
+
   const pieData = [
-    { name: 'Cumplidos', value: cumplidos, fill: STATUS_HEX_COLORS[STATUS.CUMPLIDO] },
-    { name: 'En Revisión / Pendientes', value: enRevisionYOtros, fill: STATUS_HEX_COLORS[STATUS.EN_REVISION] },
-    { name: 'No Cumplido', value: noCumplidos, fill: STATUS_HEX_COLORS[STATUS.NO_CUMPLIDO] }
+    { name: 'Cumplidos', value: groupedStatusCounts['Cumplidos'], fill: STATUS_HEX_COLORS[STATUS.CUMPLIDO] },
+    { name: 'En Revisión / Pendientes', value: groupedStatusCounts['En Revisión / Pendientes'], fill: STATUS_HEX_COLORS[STATUS.EN_REVISION] },
+    { name: 'No Cumplido', value: groupedStatusCounts['No Cumplido'], fill: STATUS_HEX_COLORS[STATUS.NO_CUMPLIDO] }
   ].filter(item => item.value > 0);
 
   const assigneeStats = tasks?.reduce((acc, task) => {
@@ -395,7 +401,7 @@ const DashboardMetrics = ({ tasks, employees }) => {
   );
 };
 
-/* --- MÓDULO NUEVO: GESTIÓN DE INDICADORES EN SUPERVISOR --- */
+/* --- MÓDULO NUEVO: INDICADORES SUPERVISOR --- */
 const IndicatorsManager = ({ user, tasks, employees, config, measurements, onSaveMeasurement }) => {
   const currentMonthValue = new Date().toISOString().slice(0,7); 
   const [selectedPeriod, setSelectedPeriod] = useState(currentMonthValue);
@@ -422,7 +428,7 @@ const IndicatorsManager = ({ user, tasks, employees, config, measurements, onSav
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 border-b border-gray-100 pb-4">
              <div>
                <h2 className="text-xl font-black text-[#8CC63F] flex items-center gap-2"><Icon name="target" className="w-6 h-6"/> Medición de Indicadores de Gestión</h2>
-               <p className="text-sm text-gray-500 font-medium">Evalúe el desempeño mensual de los miembros de su equipo.</p>
+               <p className="text-sm text-gray-500 font-medium">Evalúe el desempeño mensual de su equipo.</p>
              </div>
              <div className="mt-4 md:mt-0 flex items-center gap-3 bg-gray-50 p-2 rounded-lg border border-gray-200">
                <label className="text-sm font-bold text-[#165399]">Mes a evaluar:</label>
@@ -432,7 +438,7 @@ const IndicatorsManager = ({ user, tasks, employees, config, measurements, onSav
 
           <div className="space-y-8">
              {myTeamMembers.length === 0 ? (
-                <p className="text-center text-gray-500 py-10 font-bold">No tiene profesionales asignados para evaluar.</p>
+                <p className="text-center text-gray-500 py-10 font-bold">No tiene profesionales asignados.</p>
              ) : (
                 myTeamMembers.map(emp => {
                    return (
@@ -817,7 +823,7 @@ const AdminPanel = ({ config, onUpdateConfig, tasks, currentUser, onUpdateTaskDa
             <div className="p-3 bg-orange-50 border border-orange-200 rounded text-xs text-orange-800 font-bold mb-4">⚠️ ATENCIÓN: Modificar estados o IDs crudos puede romper la lógica.</div>
             <div className="grid grid-cols-2 gap-4">
               <div><label className="block text-xs font-bold text-gray-700 mb-1">ID</label><input type="text" value={dbTaskEdit.id} readOnly className="w-full px-3 py-1 border bg-gray-100 text-xs" /></div>
-              <div><label className="block text-xs font-bold text-gray-700 mb-1">Cédula</label><input type="text" value={dbTaskEdit.assigneeId} onChange={e => setDbTaskEdit({...dbTaskEdit, assigneeId: e.target.value})} className="w-full px-3 py-1 border text-xs" /></div>
+              <div><label className="block text-xs font-bold text-gray-700 mb-1">Cédula (assigneeId)</label><input type="text" value={dbTaskEdit.assigneeId} onChange={e => setDbTaskEdit({...dbTaskEdit, assigneeId: e.target.value})} className="w-full px-3 py-1 border text-xs" /></div>
               <div className="col-span-2"><label className="block text-xs font-bold text-gray-700 mb-1">Título</label><input type="text" value={dbTaskEdit.title} onChange={e => setDbTaskEdit({...dbTaskEdit, title: e.target.value})} className="w-full px-3 py-1 border text-xs" /></div>
               <div><label className="block text-xs font-bold text-gray-700 mb-1">Semana</label><input type="text" value={dbTaskEdit.assignedWeek} onChange={e => setDbTaskEdit({...dbTaskEdit, assignedWeek: e.target.value})} className="w-full px-3 py-1 border text-xs" /></div>
               <div><label className="block text-xs font-bold text-gray-700 mb-1">Estado</label><select value={dbTaskEdit.status} onChange={e => setDbTaskEdit({...dbTaskEdit, status: e.target.value})} className="w-full px-3 py-1 border text-xs">{Object.values(STATUS).map(s => <option key={s} value={s}>{s}</option>)}</select></div>
@@ -844,7 +850,7 @@ const AdminPanel = ({ config, onUpdateConfig, tasks, currentUser, onUpdateTaskDa
   );
 };
 
-/* --- MÓDULO FLUJO JUNIOR --- */
+/* --- FLUJO JUNIOR --- */
 const JuniorDashboard = ({ user, tasks, categories, onAddTask, onUpdateTaskStatus, onUpdateTaskData }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [reportModalOpen, setReportModalOpen] = useState(false);
@@ -1003,121 +1009,6 @@ const JuniorDashboard = ({ user, tasks, categories, onAddTask, onUpdateTaskStatu
           <div className="pt-4 flex justify-end gap-2"><button type="button" onClick={() => setIsRescheduleModalOpen(false)} className="px-4 py-2 bg-gray-100 rounded-lg font-bold">Cancelar</button><button type="submit" className="px-4 py-2 bg-[#165399] text-white rounded-lg font-bold">Reprogramar</button></div>
         </form>
       </Modal>
-    </div>
-  );
-};
-
-/* --- MÓDULO SUPERVISOR: GESTIÓN DE INDICADORES --- */
-const IndicatorsManager = ({ user, tasks, employees, config, measurements, onSaveMeasurement }) => {
-  const currentMonthValue = new Date().toISOString().slice(0,7); 
-  const [selectedPeriod, setSelectedPeriod] = useState(currentMonthValue);
-
-  const canSeeAll = user.role === 'Jefe' || user.role === 'Coordinador';
-  const myTeamMembers = canSeeAll 
-     ? (employees || []).filter(e => e.role === 'Junior' || e.role === 'Aprendiz') 
-     : (employees || []).filter(emp => emp.reviewerId === user.id && (emp.role === 'Junior' || emp.role === 'Aprendiz'));
-
-  const indicators = config?.indicators || DEFAULT_INDICATORS;
-
-  const handleValChange = (empId, indId, field, value) => {
-     const numVal = parseInt(value, 10);
-     if (isNaN(numVal) && value !== '') return;
-     const measId = `${indId}_${empId}_${selectedPeriod}`;
-     const existing = (measurements || []).find(m => m.id === measId) || { id: measId, indicatorId: indId, assigneeId: empId, period: selectedPeriod, numerator: 0, denominator: 0 };
-     const updated = { ...existing, [field]: value === '' ? 0 : numVal };
-     onSaveMeasurement(updated);
-  };
-
-  return (
-    <div className="space-y-6">
-       <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 border-t-8 border-t-[#8CC63F]">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 border-b border-gray-100 pb-4">
-             <div>
-               <h2 className="text-xl font-black text-[#8CC63F] flex items-center gap-2"><Icon name="target" className="w-6 h-6"/> Medición de Indicadores de Gestión</h2>
-               <p className="text-sm text-gray-500 font-medium">Evalúe el desempeño mensual de su equipo.</p>
-             </div>
-             <div className="mt-4 md:mt-0 flex items-center gap-3 bg-gray-50 p-2 rounded-lg border border-gray-200">
-               <label className="text-sm font-bold text-[#165399]">Mes a evaluar:</label>
-               <input type="month" value={selectedPeriod} onChange={(e) => setSelectedPeriod(e.target.value)} className="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#8CC63F] outline-none text-sm font-bold text-gray-700"/>
-             </div>
-          </div>
-
-          <div className="space-y-8">
-             {myTeamMembers.length === 0 ? (
-                <p className="text-center text-gray-500 py-10 font-bold">No tiene profesionales asignados para evaluar.</p>
-             ) : (
-                myTeamMembers.map(emp => {
-                   return (
-                      <div key={emp.id} className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                         <div className="bg-gray-50 px-4 py-3 border-b border-gray-200 flex items-center gap-3">
-                            <div className="w-8 h-8 bg-[#165399] rounded-full flex items-center justify-center text-white font-black text-xs shadow-sm">{emp.name.charAt(0)}</div>
-                            <div>
-                               <h3 className="font-bold text-[#165399] text-base leading-tight">{emp.name}</h3>
-                               <span className="text-[10px] text-gray-500 uppercase tracking-widest font-black">C.C. {emp.id}</span>
-                            </div>
-                         </div>
-                         <div className="p-4 overflow-x-auto">
-                            <table className="min-w-full divide-y divide-gray-200">
-                               <thead>
-                                  <tr>
-                                     <th className="px-2 py-2 text-left text-xs font-bold text-gray-500 uppercase">Indicador</th>
-                                     <th className="px-2 py-2 text-center text-xs font-bold text-[#165399] uppercase bg-blue-50 rounded-tl-md">Numerador</th>
-                                     <th className="px-2 py-2 text-center text-xs font-bold text-[#165399] uppercase bg-blue-50">Denominador</th>
-                                     <th className="px-2 py-2 text-center text-xs font-bold text-[#8CC63F] uppercase bg-green-50 rounded-tr-md">Resultado</th>
-                                     <th className="px-2 py-2 text-center text-xs font-bold text-gray-500 uppercase">Meta</th>
-                                  </tr>
-                               </thead>
-                               <tbody className="divide-y divide-gray-100">
-                                  {indicators.map(ind => {
-                                     let num = 0; let den = 0; let isCalc = ind.isAuto;
-
-                                     if (ind.isAuto) {
-                                        const tasksInMonth = (tasks || []).filter(t => t.assigneeId === emp.id && getTaskMonthYear(t.assignedWeek) === selectedPeriod);
-                                        den = tasksInMonth.length;
-                                        num = tasksInMonth.filter(t => t.status === STATUS.CUMPLIDO).length;
-                                     } else {
-                                        const measId = `${ind.id}_${emp.id}_${selectedPeriod}`;
-                                        const rec = (measurements || []).find(m => m.id === measId);
-                                        if (rec) { num = rec.numerator || 0; den = rec.denominator || 0; }
-                                     }
-
-                                     const result = den === 0 ? 0 : Math.round((num / den) * 100);
-                                     const cumpleMeta = result >= ind.meta;
-
-                                     return (
-                                        <tr key={ind.id} className="hover:bg-gray-50">
-                                           <td className="px-2 py-3">
-                                              <p className="text-sm font-bold text-gray-800">{ind.name}</p>
-                                              <p className="text-[9px] text-gray-400 font-mono mt-0.5" title={ind.formula}>Fórmula: {ind.formula}</p>
-                                           </td>
-                                           <td className="px-2 py-3 text-center bg-blue-50/30">
-                                              {isCalc ? <span className="font-bold text-[#165399] text-sm">{num}</span> : 
-                                                 <input type="number" min="0" value={num || ''} onChange={(e) => handleValChange(emp.id, ind.id, 'numerator', e.target.value)} className="w-16 px-2 py-1 text-center border border-blue-300 rounded text-sm font-bold text-[#165399] focus:ring-1 focus:ring-[#165399] outline-none" title={ind.numVar}/>
-                                              }
-                                           </td>
-                                           <td className="px-2 py-3 text-center bg-blue-50/30">
-                                              {isCalc ? <span className="font-bold text-[#165399] text-sm">{den}</span> : 
-                                                 <input type="number" min="0" value={den || ''} onChange={(e) => handleValChange(emp.id, ind.id, 'denominator', e.target.value)} className="w-16 px-2 py-1 text-center border border-blue-300 rounded text-sm font-bold text-[#165399] focus:ring-1 focus:ring-[#165399] outline-none" title={ind.denVar}/>
-                                              }
-                                           </td>
-                                           <td className="px-2 py-3 text-center bg-green-50/30">
-                                              <span className={`text-base font-black px-2 py-1 rounded ${cumpleMeta ? 'text-[#8CC63F] bg-[#f3f9eb]' : 'text-orange-500 bg-orange-50'}`}>{result}%</span>
-                                           </td>
-                                           <td className="px-2 py-3 text-center">
-                                              <span className="text-xs font-black text-gray-500">{ind.meta}%</span>
-                                           </td>
-                                        </tr>
-                                     );
-                                  })}
-                               </tbody>
-                            </table>
-                         </div>
-                      </div>
-                   )
-                })
-             )}
-          </div>
-       </div>
     </div>
   );
 };
@@ -1509,6 +1400,193 @@ const ReviewerDashboard = ({ user, tasks, categories, config, employees, measure
           <div className="pt-4 border-t flex justify-end gap-2"><button type="button" onClick={() => setIsRescheduleModalOpen(false)} className="px-4 py-2 bg-gray-100 rounded-lg font-bold">Cancelar</button><button type="submit" className="px-4 py-2 bg-[#165399] text-white rounded-lg font-bold">Guardar Reprogramación</button></div>
         </form>
       </Modal>
+    </div>
+  );
+};
+
+/* --- APLICACIÓN PRINCIPAL CON FLUJO SEGURO --- */
+const App = () => {
+  const [firebaseUser, setFirebaseUser] = useState(null); 
+  const [authError, setAuthError] = useState('');
+  
+  const [tasks, setTasks] = useState([]);
+  const [measurements, setMeasurements] = useState([]);
+  const [appConfig, setAppConfig] = useState({ employees: DEFAULT_EMPLOYEES, categories: DEFAULT_CATEGORIES, indicators: DEFAULT_INDICATORS });
+  const [isDbReady, setIsDbReady] = useState(false);
+  const [dashboardMode, setDashboardMode] = useState('TRACKING'); 
+
+  useEffect(() => {
+    if (!auth) { setIsDbReady(true); return; }
+    const unsub = onAuthStateChanged(auth, (user) => { setFirebaseUser(user); setIsDbReady(true); });
+    return () => unsub();
+  }, []);
+
+  useEffect(() => {
+    if (!isDbReady || !firebaseUser || !db) return;
+    
+    const tasksRef = collection(db, 'artifacts', appId, 'public', 'data', 'emssanar_tasks');
+    const unsubTasks = onSnapshot(tasksRef, (snapshot) => {
+      const data = []; snapshot.forEach(doc => data.push(doc.data())); setTasks(data);
+    }, (err) => console.error(err));
+
+    const measRef = collection(db, 'artifacts', appId, 'public', 'data', 'emssanar_measurements');
+    const unsubMeas = onSnapshot(measRef, (snapshot) => {
+      const data = []; snapshot.forEach(doc => data.push(doc.data())); setMeasurements(data);
+    }, (err) => console.error(err));
+
+    const configRef = doc(db, 'artifacts', appId, 'public', 'data', 'emssanar_settings', 'main_config');
+    const unsubConfig = onSnapshot(configRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const dbData = docSnap.data();
+        const mergedEmployees = (dbData.employees || []).map(dbEmp => {
+           if (!dbEmp.email) {
+              const defEmp = DEFAULT_EMPLOYEES.find(d => d.id === dbEmp.id);
+              return { ...dbEmp, email: defEmp ? defEmp.email : '' };
+           }
+           return dbEmp;
+        });
+        const mergedIndicators = dbData.indicators && dbData.indicators.length > 0 ? dbData.indicators : DEFAULT_INDICATORS;
+        const mergedCategories = dbData.categories && dbData.categories.length > 0 ? dbData.categories : DEFAULT_CATEGORIES;
+        
+        setAppConfig({ ...dbData, employees: mergedEmployees, indicators: mergedIndicators, categories: mergedCategories });
+      } else {
+        setDoc(configRef, { employees: DEFAULT_EMPLOYEES, categories: DEFAULT_CATEGORIES, indicators: DEFAULT_INDICATORS });
+        setAppConfig({ employees: DEFAULT_EMPLOYEES, categories: DEFAULT_CATEGORIES, indicators: DEFAULT_INDICATORS });
+      }
+    }, (err) => console.error(err));
+
+    return () => { unsubTasks(); unsubConfig(); unsubMeas(); };
+  }, [isDbReady, firebaseUser]);
+
+  const currentUser = useMemo(() => {
+    if (!firebaseUser || !appConfig.employees) return null;
+    return appConfig.employees.find(emp => emp.email?.toLowerCase() === firebaseUser.email?.toLowerCase());
+  }, [firebaseUser, appConfig]);
+
+  useEffect(() => {
+    if (tasks.length === 0 || !isDbReady || !currentUser) return;
+    const checkOverdue = async () => {
+      const now = new Date();
+      const myOverdueTasks = tasks.filter(t => t.assigneeId === currentUser.id && (t.status === STATUS.ASIGNADO || t.status === STATUS.EN_PROGRESO) && t.assignedWeek);
+      
+      for (const t of myOverdueTasks) {
+        if (!t.assignedWeek) continue;
+        const match = t.assignedWeek.match(/al (\d{2})\/(\d{2})\/(\d{2})/);
+        if (match) {
+           const day = parseInt(match[1], 10); const month = parseInt(match[2], 10) - 1; const year = parseInt(match[3], 10) + 2000;
+           const friday = new Date(year, month, day, 23, 59, 59);
+           if (now > friday && db) {
+               try { await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'emssanar_tasks', t.id), { status: STATUS.NO_REPORTADO }); } catch (e) {}
+           }
+        }
+      }
+    };
+    const timer = setInterval(checkOverdue, 60000);
+    return () => clearInterval(timer);
+  }, [tasks, isDbReady, currentUser]);
+
+  const pendingReviewsCount = useMemo(() => {
+    if (!currentUser || !currentUser.canReview) return 0;
+    return tasks.filter(t => t.reviewerId === currentUser.id && (t.status === STATUS.EN_REVISION || t.status === STATUS.SOLICITUD_CONTINUIDAD)).length;
+  }, [tasks, currentUser]);
+
+  const handleLogin = async (email, password) => {
+    if (!auth) return;
+    try {
+      setAuthError(''); await signInWithEmailAndPassword(auth, email, password);
+    } catch (error) {
+      if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
+        setAuthError('Correo o contraseña incorrectos.');
+      } else { setAuthError('Error: ' + error.message); }
+    }
+  };
+
+  const handleLogout = async () => { if (auth) await signOut(auth); setFirebaseUser(null); };
+
+  if (!isDbReady) return <div className="min-h-screen bg-gray-100 flex items-center justify-center font-bold text-[#165399]">Cargando plataforma segura...</div>;
+  if (!firebaseUser) return <LoginScreen onLogin={handleLogin} authError={authError} />;
+  if (!currentUser) {
+    return (
+       <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4 text-center">
+         <div className="bg-white p-8 rounded-xl shadow-lg border-t-8 border-red-600 max-w-md w-full">
+           <Icon name="alert" className="w-16 h-16 text-red-600 mx-auto mb-4" />
+           <h2 className="text-xl font-black text-red-700 mb-2">Usuario no autorizado</h2>
+           <p className="mb-6 text-sm text-gray-600 font-medium">El correo <span className="font-bold text-[#165399]">{firebaseUser.email}</span> no está vinculado a ningún profesional en la base de datos de esta plataforma.</p>
+           <button onClick={handleLogout} className="w-full bg-[#165399] hover:bg-[#114078] text-white font-bold px-4 py-3 rounded-lg transition-colors">Cerrar Sesión e intentar de nuevo</button>
+         </div>
+       </div>
+    );
+  }
+
+  const handleUpdateConfig = async (newConfig) => { if (db) { try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'emssanar_settings', 'main_config'), newConfig); } catch (e) {} } };
+  const handleAddTask = async (t) => { if (db) await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'emssanar_tasks', t.id), t); };
+  const handleUpdateTaskStatus = async (id, s) => { if (db) await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'emssanar_tasks', id), { status: s }); };
+  const handleUpdateTaskData = async (id, d) => { if (db) await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'emssanar_tasks', id), d); };
+  const handleAddComment = async (id, c) => { if (db) { const task = tasks.find(t => t.id === id); if (task) await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'emssanar_tasks', id), { comments: [...(task.comments || []), c] }); } };
+  const handleDeleteTask = async (id) => { if (db) { try { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'emssanar_tasks', id)); } catch (error) {} } };
+  const handleSaveMeasurement = async (measurementData) => { if (db) { try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'emssanar_measurements', measurementData.id), measurementData); } catch (e) {} } };
+  const handleImportTasks = async (importedTasks) => { if (!Array.isArray(importedTasks) || !db) return; for (const t of importedTasks) { try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'emssanar_tasks', t.id), t); } catch (e) {} } };
+  const handleClearAllTasks = async () => { if (!db) return; for (const t of tasks) { try { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'emssanar_tasks', t.id)); } catch (e) {} } };
+
+  return (
+    <div className="min-h-screen bg-gray-100 text-gray-800 font-sans">
+      <header className="bg-[#165399] text-white shadow-lg sticky top-0 z-40 border-b-4 border-[#8CC63F]">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+          <div>
+            <h1 className="text-xl font-black tracking-tight leading-tight uppercase">Sistema de Gestión de Entregables</h1>
+            <h2 className="text-xs font-bold text-[#8CC63F] uppercase tracking-widest">Planeación y Calidad</h2>
+          </div>
+          
+          {(currentUser.role === 'Coordinador' || currentUser.role === 'Jefe') && (
+            <div className="flex bg-[#114078] p-1 rounded-lg border border-blue-800 shadow-inner overflow-hidden mx-auto md:mx-0">
+              <button onClick={() => setDashboardMode('TRACKING')} className={`px-4 py-1.5 text-sm font-bold transition-colors ${dashboardMode === 'TRACKING' ? 'bg-[#8CC63F] text-white rounded' : 'text-blue-200 hover:text-white'}`}>Seguimiento</button>
+              <button onClick={() => setDashboardMode('ADMIN')} className={`px-4 py-1.5 text-sm font-bold flex items-center gap-1 transition-colors ${dashboardMode === 'ADMIN' ? 'bg-[#8CC63F] text-white rounded' : 'text-blue-200 hover:text-white'}`}>
+                <Icon name="settings" className="w-4 h-4"/> Configuración
+              </button>
+            </div>
+          )}
+
+          <div className="flex items-center gap-4 bg-[#114078] px-4 py-2 rounded-xl shadow-inner border border-blue-800">
+            <div className="text-right hidden sm:block">
+              <p className="text-sm font-bold">{currentUser.name}</p>
+              <p className="text-[10px] text-[#AAB4C2] font-black uppercase tracking-wider">{currentUser.role}</p>
+            </div>
+            <div className="w-10 h-10 bg-[#8CC63F] rounded-full flex items-center justify-center text-white font-black text-lg shadow-md border-2 border-white">
+              {currentUser.name.charAt(0)}
+            </div>
+            <button onClick={handleLogout} className="ml-2 text-xs bg-red-600 hover:bg-red-700 px-3 py-2 rounded-lg font-bold transition-colors shadow-sm">
+              Salir
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto px-4 py-8">
+        {dashboardMode === 'ADMIN' ? (
+          <AdminPanel config={appConfig} onUpdateConfig={handleUpdateConfig} tasks={tasks} currentUser={currentUser} onUpdateTaskData={handleUpdateTaskData} onDeleteTask={handleDeleteTask} onImportTasks={handleImportTasks} onClearAllTasks={handleClearAllTasks} />
+        ) : (
+          <>
+            <div className="mb-6 flex gap-4">
+              <div className="flex-1 bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex items-center gap-4">
+                <div className="p-3 bg-blue-50 rounded-lg border border-blue-100"><Icon name="user" className="w-6 h-6 text-[#165399]" /></div>
+                <div><p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Perfil Actual</p><p className="text-lg font-black text-[#165399]">{currentUser.role}</p></div>
+              </div>
+              {currentUser.canReview && (
+                <div className="flex-1 bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex items-center gap-4">
+                  <div className="p-3 bg-green-50 rounded-lg border border-green-100"><Icon name="clock" className="w-6 h-6 text-[#8CC63F]" /></div>
+                  <div><p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Pendientes de Revisión</p><p className="text-lg font-black text-[#8CC63F]">{pendingReviewsCount} Entregables</p></div>
+                </div>
+              )}
+            </div>
+
+            {currentUser.canReview ? (
+              <ReviewerDashboard user={currentUser} tasks={tasks} categories={appConfig.categories || DEFAULT_CATEGORIES} config={appConfig} employees={appConfig.employees} measurements={measurements} onAddTask={handleAddTask} onUpdateTaskStatus={handleUpdateTaskStatus} onAddComment={handleAddComment} onUpdateTaskData={handleUpdateTaskData} onDeleteTask={handleDeleteTask} onSaveMeasurement={handleSaveMeasurement} />
+            ) : (
+              <JuniorDashboard user={currentUser} tasks={tasks} categories={appConfig.categories || DEFAULT_CATEGORIES} onAddTask={handleAddTask} onUpdateTaskStatus={handleUpdateTaskStatus} onUpdateTaskData={handleUpdateTaskData} onDeleteTask={handleDeleteTask} />
+            )}
+          </>
+        )}
+      </main>
     </div>
   );
 };
