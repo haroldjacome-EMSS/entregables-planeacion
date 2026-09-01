@@ -68,6 +68,10 @@ const STATUS_HEX_COLORS = {
   [STATUS.NO_REPORTADO]: '#DC2626',
 };
 
+// ==========================================
+// ⚠️ REVISA Y CORRIGE LOS CORREOS AQUÍ
+// Deben coincidir exactamente con los que creaste en Firebase
+// ==========================================
 const DEFAULT_EMPLOYEES = [
   { id: '1085253822', email: 'johanavallejo@emssanareps.co', name: 'Jhoana Consuelo Vallejo Ramos', role: 'Jefe', canReview: true },
   { id: '1085929260', email: 'haroldjacome@emssanareps.co', name: 'Harold Andres Jacome', role: 'Coordinador', canReview: true },
