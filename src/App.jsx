@@ -109,15 +109,16 @@ const DEFAULT_INDICATORS = [
   {
     id: 'ind-auto-1',
     name: 'Nivel de conformidad de productos asignados',
-    formula: '(Entregables cumplidos / Entregables asignados en el mes) * 100',
-    numVar: 'Entregables cumplidos en el mes',
-    denVar: 'Total entregables asignados en el mes',
+    formula: '(Entregables cumplidos / Entregables asignados en el periodo) * 100',
+    numVar: 'Entregables cumplidos en el periodo',
+    denVar: 'Total entregables asignados en el periodo',
     meta: 100,
+    periodicity: 'Mensual',
     isAuto: true 
   }
 ];
 
-/* FUNCIONES AUXILIARES BLINDADAS */
+/* FUNCIONES AUXILIARES */
 const getWeekData = (dateInput) => {
   if (!dateInput) return '';
   if (typeof dateInput === 'string' && dateInput.includes('/')) return dateInput; 
@@ -251,12 +252,26 @@ const LoginScreen = ({ onLogin, authError }) => {
         <form onSubmit={handleLogin} className="space-y-6">
           <div>
             <label className="block text-sm font-semibold text-[#165399] mb-2">Correo Institucional</label>
-            <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="ejemplo@emssanareps.co" className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#165399] outline-none transition-shadow bg-gray-50 text-gray-800 font-medium" />
+            <input 
+              required
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="ejemplo@emssanareps.co"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#165399] outline-none transition-shadow bg-gray-50 text-gray-800 font-medium"
+            />
           </div>
 
           <div>
             <label className="block text-sm font-semibold text-[#165399] mb-2">Contraseña</label>
-            <input required type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Ingrese su contraseña" className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#165399] outline-none transition-shadow bg-gray-50 text-gray-800 font-medium" />
+            <input 
+              required
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Ingrese su contraseña"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#165399] outline-none transition-shadow bg-gray-50 text-gray-800 font-medium"
+            />
           </div>
 
           {authError && (
@@ -265,7 +280,11 @@ const LoginScreen = ({ onLogin, authError }) => {
             </div>
           )}
 
-          <button type="submit" disabled={!email || !password || loading} className="w-full bg-[#8CC63F] hover:bg-[#78b030] text-white font-bold py-3 px-4 rounded-lg transition-colors disabled:opacity-50 shadow-md">
+          <button 
+            type="submit" 
+            disabled={!email || !password || loading}
+            className="w-full bg-[#8CC63F] hover:bg-[#78b030] text-white font-bold py-3 px-4 rounded-lg transition-colors disabled:opacity-50 shadow-md"
+          >
             {loading ? 'Verificando credenciales...' : 'Ingresar al Sistema'}
           </button>
         </form>
@@ -401,15 +420,19 @@ const DashboardMetrics = ({ tasks, employees }) => {
   );
 };
 
-/* --- MÓDULO NUEVO: INDICADORES SUPERVISOR --- */
+/* --- MÓDULO SUPERVISOR: GESTIÓN DE INDICADORES --- */
 const IndicatorsManager = ({ user, tasks, employees, config, measurements, onSaveMeasurement }) => {
   const currentMonthValue = new Date().toISOString().slice(0,7); 
   const [selectedPeriod, setSelectedPeriod] = useState(currentMonthValue);
+  const [viewScope, setViewScope] = useState('MY_TEAM'); // Alternar entre mi equipo o todos
 
-  const canSeeAll = user.role === 'Jefe' || user.role === 'Coordinador';
-  const myTeamMembers = canSeeAll 
-     ? (employees || []).filter(e => e.role === 'Junior' || e.role === 'Aprendiz') 
-     : (employees || []).filter(emp => emp.reviewerId === user.id && (emp.role === 'Junior' || emp.role === 'Aprendiz'));
+  // Los supervisores ven a su equipo directo, pero pueden alternar para ver a todos
+  const availableJuniors = (employees || []).filter(e => e.role === 'Junior' || e.role === 'Aprendiz');
+  const myTeamIds = (employees || []).filter(emp => emp.reviewerId === user.id).map(e => e.id);
+  
+  const myTeamMembers = viewScope === 'ALL' 
+     ? availableJuniors 
+     : availableJuniors.filter(emp => myTeamIds.includes(emp.id));
 
   const indicators = config?.indicators || DEFAULT_INDICATORS;
 
@@ -428,17 +451,23 @@ const IndicatorsManager = ({ user, tasks, employees, config, measurements, onSav
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 border-b border-gray-100 pb-4">
              <div>
                <h2 className="text-xl font-black text-[#8CC63F] flex items-center gap-2"><Icon name="target" className="w-6 h-6"/> Medición de Indicadores de Gestión</h2>
-               <p className="text-sm text-gray-500 font-medium">Evalúe el desempeño mensual de su equipo.</p>
+               <p className="text-sm text-gray-500 font-medium">Evalúe el desempeño de los profesionales según los KPIs configurados.</p>
              </div>
-             <div className="mt-4 md:mt-0 flex items-center gap-3 bg-gray-50 p-2 rounded-lg border border-gray-200">
-               <label className="text-sm font-bold text-[#165399]">Mes a evaluar:</label>
-               <input type="month" value={selectedPeriod} onChange={(e) => setSelectedPeriod(e.target.value)} className="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#8CC63F] outline-none text-sm font-bold text-gray-700"/>
+             <div className="mt-4 md:mt-0 flex flex-col sm:flex-row items-end sm:items-center gap-4">
+               <div className="flex bg-gray-100 p-1 rounded-lg border border-gray-200">
+                  <button onClick={() => setViewScope('MY_TEAM')} className={`px-4 py-2 text-sm font-bold rounded-md transition-colors ${viewScope === 'MY_TEAM' ? 'bg-white text-[#165399] shadow-sm' : 'text-gray-500 hover:text-gray-800'}`}>Mi Equipo Directo</button>
+                  <button onClick={() => setViewScope('ALL')} className={`px-4 py-2 text-sm font-bold rounded-md transition-colors ${viewScope === 'ALL' ? 'bg-white text-[#165399] shadow-sm' : 'text-gray-500 hover:text-gray-800'}`}>Todo el Equipo</button>
+               </div>
+               <div className="flex items-center gap-3 bg-gray-50 p-2 rounded-lg border border-gray-200">
+                 <label className="text-sm font-bold text-[#165399]">Periodo a evaluar:</label>
+                 <input type="month" value={selectedPeriod} onChange={(e) => setSelectedPeriod(e.target.value)} className="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#8CC63F] outline-none text-sm font-bold text-gray-700"/>
+               </div>
              </div>
           </div>
 
           <div className="space-y-8">
              {myTeamMembers.length === 0 ? (
-                <p className="text-center text-gray-500 py-10 font-bold">No tiene profesionales asignados.</p>
+                <p className="text-center text-gray-500 py-10 font-bold">No hay profesionales asignados para evaluar en esta vista.</p>
              ) : (
                 myTeamMembers.map(emp => {
                    return (
@@ -447,7 +476,7 @@ const IndicatorsManager = ({ user, tasks, employees, config, measurements, onSav
                             <div className="w-8 h-8 bg-[#165399] rounded-full flex items-center justify-center text-white font-black text-xs shadow-sm">{emp.name.charAt(0)}</div>
                             <div>
                                <h3 className="font-bold text-[#165399] text-base leading-tight">{emp.name}</h3>
-                               <span className="text-[10px] text-gray-500 uppercase tracking-widest font-black">C.C. {emp.id}</span>
+                               <span className="text-[10px] text-gray-500 uppercase tracking-widest font-black">C.C. {emp.id} - {emp.role}</span>
                             </div>
                          </div>
                          <div className="p-4 overflow-x-auto">
@@ -455,6 +484,7 @@ const IndicatorsManager = ({ user, tasks, employees, config, measurements, onSav
                                <thead>
                                   <tr>
                                      <th className="px-2 py-2 text-left text-xs font-bold text-gray-500 uppercase">Indicador</th>
+                                     <th className="px-2 py-2 text-center text-xs font-bold text-gray-500 uppercase">Periodicidad</th>
                                      <th className="px-2 py-2 text-center text-xs font-bold text-[#165399] uppercase bg-blue-50 rounded-tl-md">Numerador</th>
                                      <th className="px-2 py-2 text-center text-xs font-bold text-[#165399] uppercase bg-blue-50">Denominador</th>
                                      <th className="px-2 py-2 text-center text-xs font-bold text-[#8CC63F] uppercase bg-green-50 rounded-tr-md">Resultado</th>
@@ -466,6 +496,7 @@ const IndicatorsManager = ({ user, tasks, employees, config, measurements, onSav
                                      let num = 0; let den = 0; let isCalc = ind.isAuto;
 
                                      if (ind.isAuto) {
+                                        // El cálculo auto siempre se basa en el periodo "YYYY-MM"
                                         const tasksInMonth = (tasks || []).filter(t => t.assigneeId === emp.id && getTaskMonthYear(t.assignedWeek) === selectedPeriod);
                                         den = tasksInMonth.length;
                                         num = tasksInMonth.filter(t => t.status === STATUS.CUMPLIDO).length;
@@ -484,14 +515,17 @@ const IndicatorsManager = ({ user, tasks, employees, config, measurements, onSav
                                               <p className="text-sm font-bold text-gray-800">{ind.name}</p>
                                               <p className="text-[9px] text-gray-400 font-mono mt-0.5" title={ind.formula}>Fórmula: {ind.formula}</p>
                                            </td>
+                                           <td className="px-2 py-3 text-center">
+                                              <span className="text-[10px] font-black text-gray-500 bg-gray-100 px-2 py-1 rounded">{ind.periodicity || 'Mensual'}</span>
+                                           </td>
                                            <td className="px-2 py-3 text-center bg-blue-50/30">
                                               {isCalc ? <span className="font-bold text-[#165399] text-sm">{num}</span> : 
-                                                 <input type="number" min="0" value={num || ''} onChange={(e) => handleValChange(emp.id, ind.id, 'numerator', e.target.value)} className="w-16 px-2 py-1 text-center border border-blue-300 rounded text-sm font-bold text-[#165399] focus:ring-1 focus:ring-[#165399] outline-none" title={ind.numVar}/>
+                                                 <input type="number" min="0" value={num || ''} onChange={(e) => handleValChange(emp.id, ind.id, 'numerator', e.target.value)} className="w-16 px-2 py-1 text-center border border-blue-300 rounded text-sm font-bold text-[#165399] outline-none focus:ring-1 focus:ring-[#165399]" title={ind.numVar}/>
                                               }
                                            </td>
                                            <td className="px-2 py-3 text-center bg-blue-50/30">
                                               {isCalc ? <span className="font-bold text-[#165399] text-sm">{den}</span> : 
-                                                 <input type="number" min="0" value={den || ''} onChange={(e) => handleValChange(emp.id, ind.id, 'denominator', e.target.value)} className="w-16 px-2 py-1 text-center border border-blue-300 rounded text-sm font-bold text-[#165399] focus:ring-1 focus:ring-[#165399] outline-none" title={ind.denVar}/>
+                                                 <input type="number" min="0" value={den || ''} onChange={(e) => handleValChange(emp.id, ind.id, 'denominator', e.target.value)} className="w-16 px-2 py-1 text-center border border-blue-300 rounded text-sm font-bold text-[#165399] outline-none focus:ring-1 focus:ring-[#165399]" title={ind.denVar}/>
                                               }
                                            </td>
                                            <td className="px-2 py-3 text-center bg-green-50/30">
@@ -530,7 +564,8 @@ const AdminPanel = ({ config, onUpdateConfig, tasks, currentUser, onUpdateTaskDa
   const [dbTaskEdit, setDbTaskEdit] = useState(null);
 
   const [isIndicatorModalOpen, setIsIndicatorModalOpen] = useState(false);
-  const [newIndicator, setNewIndicator] = useState({ id: '', name: '', formula: '', numVar: '', denVar: '', meta: 100, isAuto: false });
+  // Estado para la creación/edición de indicadores con el nuevo campo periodicidad
+  const [newIndicator, setNewIndicator] = useState({ id: '', name: '', formula: '', numVar: '', denVar: '', meta: 100, periodicity: 'Mensual', isAuto: false });
 
   const handleAddUser = (e) => {
     e.preventDefault();
@@ -567,19 +602,30 @@ const AdminPanel = ({ config, onUpdateConfig, tasks, currentUser, onUpdateTaskDa
 
   const saveCategories = () => { onUpdateConfig({ ...config, categories: categoriesState }); alert("Tiempos actualizados exitosamente."); };
 
-  const handleAddIndicator = (e) => {
+  const openEditIndicator = (ind) => {
+    setNewIndicator(ind);
+    setIsIndicatorModalOpen(true);
+  };
+
+  const handleSaveIndicator = (e) => {
     e.preventDefault();
-    const indToAdd = { ...newIndicator, id: newIndicator.id || `ind-man-${Date.now()}` };
-    const updatedInds = [...indicatorsState, indToAdd];
+    const isEdit = indicatorsState.some(i => i.id === newIndicator.id);
+    let updatedInds;
+    if (isEdit) {
+      updatedInds = indicatorsState.map(i => i.id === newIndicator.id ? newIndicator : i);
+    } else {
+      const indToAdd = { ...newIndicator, id: `ind-man-${Date.now()}` };
+      updatedInds = [...indicatorsState, indToAdd];
+    }
     setIndicatorsState(updatedInds);
     onUpdateConfig({ ...config, indicators: updatedInds });
     setIsIndicatorModalOpen(false);
-    setNewIndicator({ id: '', name: '', formula: '', numVar: '', denVar: '', meta: 100, isAuto: false });
+    setNewIndicator({ id: '', name: '', formula: '', numVar: '', denVar: '', meta: 100, periodicity: 'Mensual', isAuto: false });
   };
 
   const handleDeleteIndicator = (indId) => {
-    if (indId === 'ind-auto-1') { alert("Este indicador está bloqueado por el sistema y no puede eliminarse."); return; }
-    if(window.confirm("¿Eliminar este indicador de la parametrización?")) {
+    if (indId === 'ind-auto-1') { alert("Este indicador es automático para la plataforma y no puede eliminarse."); return; }
+    if(window.confirm("¿Seguro que desea eliminar este indicador de forma permanente?")) {
       const updatedInds = indicatorsState.filter(i => i.id !== indId);
       setIndicatorsState(updatedInds);
       onUpdateConfig({ ...config, indicators: updatedInds });
@@ -712,7 +758,7 @@ const AdminPanel = ({ config, onUpdateConfig, tasks, currentUser, onUpdateTaskDa
                     <h3 className="font-black text-[#8CC63F] text-lg">Parametrización de Indicadores</h3>
                     <p className="text-sm text-gray-600 font-medium">Configure los KPIs que los supervisores medirán para sus equipos.</p>
                   </div>
-                  <button onClick={() => setIsIndicatorModalOpen(true)} className="bg-[#8CC63F] hover:bg-[#78b030] text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 shadow-sm">
+                  <button onClick={() => { setNewIndicator({ id: '', name: '', formula: '', numVar: '', denVar: '', meta: 100, periodicity: 'Mensual', isAuto: false }); setIsIndicatorModalOpen(true); }} className="bg-[#8CC63F] hover:bg-[#78b030] text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 shadow-sm">
                     <Icon name="plus" className="w-4 h-4"/> Nuevo Indicador
                   </button>
                </div>
@@ -728,11 +774,15 @@ const AdminPanel = ({ config, onUpdateConfig, tasks, currentUser, onUpdateTaskDa
                        <div className="mt-auto space-y-1">
                           <p className="text-xs text-gray-600"><span className="font-bold text-[#165399]">Num:</span> {ind.numVar}</p>
                           <p className="text-xs text-gray-600"><span className="font-bold text-[#165399]">Den:</span> {ind.denVar}</p>
-                          <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-100">
+                          <p className="text-xs text-gray-600"><span className="font-bold text-[#165399]">Frecuencia:</span> {ind.periodicity || 'Mensual'}</p>
+                          <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-200">
                              <span className="text-xs font-black text-[#8CC63F]">Meta: {ind.meta}%</span>
-                             {!ind.isAuto && (
-                                <button onClick={() => handleDeleteIndicator(ind.id)} className="text-red-500 hover:text-red-700 bg-red-50 p-1.5 rounded"><Icon name="trash" className="w-3 h-3"/></button>
-                             )}
+                             <div className="flex gap-1">
+                                <button onClick={() => openEditIndicator(ind)} className="text-[#165399] hover:text-[#114078] bg-blue-100 p-1.5 rounded" title="Editar"><Icon name="edit" className="w-3 h-3"/></button>
+                                {!ind.isAuto && (
+                                   <button onClick={() => handleDeleteIndicator(ind.id)} className="text-red-500 hover:text-red-700 bg-red-50 p-1.5 rounded" title="Eliminar"><Icon name="trash" className="w-3 h-3"/></button>
+                                )}
+                             </div>
                           </div>
                        </div>
                     </div>
@@ -823,7 +873,7 @@ const AdminPanel = ({ config, onUpdateConfig, tasks, currentUser, onUpdateTaskDa
             <div className="p-3 bg-orange-50 border border-orange-200 rounded text-xs text-orange-800 font-bold mb-4">⚠️ ATENCIÓN: Modificar estados o IDs crudos puede romper la lógica.</div>
             <div className="grid grid-cols-2 gap-4">
               <div><label className="block text-xs font-bold text-gray-700 mb-1">ID</label><input type="text" value={dbTaskEdit.id} readOnly className="w-full px-3 py-1 border bg-gray-100 text-xs" /></div>
-              <div><label className="block text-xs font-bold text-gray-700 mb-1">Cédula (assigneeId)</label><input type="text" value={dbTaskEdit.assigneeId} onChange={e => setDbTaskEdit({...dbTaskEdit, assigneeId: e.target.value})} className="w-full px-3 py-1 border text-xs" /></div>
+              <div><label className="block text-xs font-bold text-gray-700 mb-1">Cédula</label><input type="text" value={dbTaskEdit.assigneeId} onChange={e => setDbTaskEdit({...dbTaskEdit, assigneeId: e.target.value})} className="w-full px-3 py-1 border text-xs" /></div>
               <div className="col-span-2"><label className="block text-xs font-bold text-gray-700 mb-1">Título</label><input type="text" value={dbTaskEdit.title} onChange={e => setDbTaskEdit({...dbTaskEdit, title: e.target.value})} className="w-full px-3 py-1 border text-xs" /></div>
               <div><label className="block text-xs font-bold text-gray-700 mb-1">Semana</label><input type="text" value={dbTaskEdit.assignedWeek} onChange={e => setDbTaskEdit({...dbTaskEdit, assignedWeek: e.target.value})} className="w-full px-3 py-1 border text-xs" /></div>
               <div><label className="block text-xs font-bold text-gray-700 mb-1">Estado</label><select value={dbTaskEdit.status} onChange={e => setDbTaskEdit({...dbTaskEdit, status: e.target.value})} className="w-full px-3 py-1 border text-xs">{Object.values(STATUS).map(s => <option key={s} value={s}>{s}</option>)}</select></div>
@@ -833,17 +883,56 @@ const AdminPanel = ({ config, onUpdateConfig, tasks, currentUser, onUpdateTaskDa
         )}
       </Modal>
 
-      <Modal isOpen={isIndicatorModalOpen} onClose={() => setIsIndicatorModalOpen(false)} title="Crear Nuevo Indicador (KPI)">
-        <form onSubmit={handleAddIndicator} className="space-y-4">
+      <Modal isOpen={isIndicatorModalOpen} onClose={() => setIsIndicatorModalOpen(false)} title={newIndicator.id ? "Editar Indicador (KPI)" : "Crear Nuevo Indicador (KPI)"}>
+        <form onSubmit={handleSaveIndicator} className="space-y-4">
           <div className="p-3 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800 font-bold mb-4">Los indicadores se calculan como porcentaje: <code>(Numerador / Denominador) * 100</code></div>
-          <div><label className="block text-sm font-bold text-[#165399] mb-1">Nombre del Indicador <span className="text-red-500">*</span></label><input required type="text" value={newIndicator.name} onChange={e => setNewIndicator({...newIndicator, name: e.target.value})} className="w-full px-3 py-2 border rounded-lg" /></div>
-          <div><label className="block text-sm font-bold text-[#165399] mb-1">Fórmula (Texto)</label><input type="text" value={newIndicator.formula} onChange={e => setNewIndicator({...newIndicator, formula: e.target.value})} placeholder="Ej: (Total X / Total Y) * 100" className="w-full px-3 py-2 border rounded-lg" /></div>
-          <div className="grid grid-cols-2 gap-4">
-            <div><label className="block text-sm font-bold text-[#165399] mb-1">Variable Numerador <span className="text-red-500">*</span></label><input required type="text" value={newIndicator.numVar} onChange={e => setNewIndicator({...newIndicator, numVar: e.target.value})} className="w-full px-3 py-2 border rounded-lg" /></div>
-            <div><label className="block text-sm font-bold text-[#165399] mb-1">Variable Denominador <span className="text-red-500">*</span></label><input required type="text" value={newIndicator.denVar} onChange={e => setNewIndicator({...newIndicator, denVar: e.target.value})} className="w-full px-3 py-2 border rounded-lg" /></div>
+          
+          <div>
+             <label className="block text-sm font-bold text-[#165399] mb-1">Nombre del Indicador <span className="text-red-500">*</span></label>
+             <input required type="text" value={newIndicator.name} onChange={e => setNewIndicator({...newIndicator, name: e.target.value})} className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#165399] outline-none" />
           </div>
-          <div><label className="block text-sm font-bold text-[#165399] mb-1">Meta Esperada (%) <span className="text-red-500">*</span></label><div className="flex items-center gap-2"><input required type="number" min="0" max="100" value={newIndicator.meta} onChange={e => setNewIndicator({...newIndicator, meta: parseInt(e.target.value)})} className="w-24 px-3 py-2 border rounded-lg" /><span className="font-black text-gray-500">%</span></div></div>
-          <div className="pt-4 flex justify-end gap-2"><button type="button" onClick={() => setIsIndicatorModalOpen(false)} className="px-4 py-2 bg-gray-100 rounded-lg font-bold">Cancelar</button><button type="submit" className="px-4 py-2 bg-[#8CC63F] text-white rounded-lg font-bold">Crear Indicador</button></div>
+          
+          <div>
+             <label className="block text-sm font-bold text-[#165399] mb-1">Fórmula (Texto)</label>
+             <input type="text" value={newIndicator.formula} onChange={e => setNewIndicator({...newIndicator, formula: e.target.value})} disabled={newIndicator.isAuto} placeholder="Ej: (Total X / Total Y) * 100" className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#165399] outline-none ${newIndicator.isAuto ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''}`} />
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+               <label className="block text-sm font-bold text-[#165399] mb-1">Variable Numerador <span className="text-red-500">*</span></label>
+               <input required type="text" value={newIndicator.numVar} onChange={e => setNewIndicator({...newIndicator, numVar: e.target.value})} disabled={newIndicator.isAuto} className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#165399] outline-none ${newIndicator.isAuto ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''}`} />
+            </div>
+            <div>
+               <label className="block text-sm font-bold text-[#165399] mb-1">Variable Denominador <span className="text-red-500">*</span></label>
+               <input required type="text" value={newIndicator.denVar} onChange={e => setNewIndicator({...newIndicator, denVar: e.target.value})} disabled={newIndicator.isAuto} className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#165399] outline-none ${newIndicator.isAuto ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''}`} />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+             <div>
+               <label className="block text-sm font-bold text-[#165399] mb-1">Periodicidad <span className="text-red-500">*</span></label>
+               <select required value={newIndicator.periodicity} onChange={e => setNewIndicator({...newIndicator, periodicity: e.target.value})} className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#165399] outline-none">
+                  <option value="Semanal">Semanal</option>
+                  <option value="Mensual">Mensual</option>
+                  <option value="Bimestral">Bimestral</option>
+                  <option value="Trimestral">Trimestral</option>
+                  <option value="Semestral">Semestral</option>
+                  <option value="Anual">Anual</option>
+               </select>
+             </div>
+             <div>
+                <label className="block text-sm font-bold text-[#165399] mb-1">Meta Esperada (%) <span className="text-red-500">*</span></label>
+                <div className="flex items-center gap-2">
+                   <input required type="number" min="0" max="100" value={newIndicator.meta} onChange={e => setNewIndicator({...newIndicator, meta: parseInt(e.target.value)})} className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#165399] outline-none" />
+                   <span className="font-black text-gray-500">%</span>
+                </div>
+             </div>
+          </div>
+
+          <div className="pt-4 flex justify-end gap-2">
+             <button type="button" onClick={() => setIsIndicatorModalOpen(false)} className="px-4 py-2 bg-gray-100 rounded-lg font-bold">Cancelar</button>
+             <button type="submit" className="px-4 py-2 bg-[#8CC63F] text-white rounded-lg font-bold">Guardar Indicador</button>
+          </div>
         </form>
       </Modal>
     </div>
@@ -963,12 +1052,20 @@ const JuniorDashboard = ({ user, tasks, categories, onAddTask, onUpdateTaskStatu
                   </div>
                   <div className="bg-gray-50 px-4 py-3 border-t border-gray-200 flex flex-col gap-2">
                     <div className="flex gap-2 w-full">
-                      {(task.status === STATUS.ASIGNADO || task.status === STATUS.NO_REPORTADO) && (<button onClick={() => onUpdateTaskStatus(task.id, STATUS.EN_PROGRESO)} className="text-xs w-full bg-white border border-[#165399] text-[#165399] px-3 py-2 rounded-lg font-bold">{task.status === STATUS.NO_REPORTADO ? 'Iniciar Atrasado' : 'Iniciar Trabajo'}</button>)}
-                      {(task.status === STATUS.EN_PROGRESO || task.status === STATUS.CON_OBSERVACIONES) && (<button onClick={() => openReportModal(task)} className="text-xs w-full bg-[#165399] text-white px-3 py-2 rounded-lg font-bold">Redactar Reporte</button>)}
-                      {(task.status === STATUS.EN_REVISION || task.status === STATUS.SOLICITUD_CONTINUIDAD) && (<button onClick={() => openReportModal(task)} className="text-xs w-full bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded-lg font-bold flex justify-center gap-1"><Icon name="edit" className="w-3 h-3" /> Modificar Reporte</button>)}
+                      {(task.status === STATUS.ASIGNADO || task.status === STATUS.NO_REPORTADO) && (
+                         <button onClick={() => onUpdateTaskStatus(task.id, STATUS.EN_PROGRESO)} className="text-xs w-full bg-white border border-[#165399] text-[#165399] hover:bg-blue-50 px-3 py-2 rounded-lg font-bold shadow-sm transition-colors">{task.status === STATUS.NO_REPORTADO ? 'Iniciar Atrasado' : 'Iniciar Trabajo'}</button>
+                      )}
+                      {(task.status === STATUS.EN_PROGRESO || task.status === STATUS.CON_OBSERVACIONES) && (
+                         <button onClick={() => openReportModal(task)} className="text-xs w-full bg-[#165399] hover:bg-[#114078] text-white px-3 py-2 rounded-lg font-bold shadow-sm transition-colors">Redactar Reporte y Enviar</button>
+                      )}
+                      {(task.status === STATUS.EN_REVISION || task.status === STATUS.SOLICITUD_CONTINUIDAD) && (
+                         <button onClick={() => openReportModal(task)} className="text-xs w-full bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 px-3 py-2 rounded-lg font-bold flex items-center justify-center gap-1 shadow-sm transition-colors"><Icon name="edit" className="w-3 h-3" /> Modificar Reporte</button>
+                      )}
                     </div>
                     <div className="flex gap-2 w-full">
-                      {task.status !== STATUS.CUMPLIDO && (<button onClick={() => { setActiveTask(task); setRescheduleWeek(task.assignedWeek); setIsRescheduleModalOpen(true); }} className="text-xs flex-1 bg-white border border-gray-300 text-gray-700 px-3 py-2 rounded-lg font-bold flex justify-center gap-1"><Icon name="clock" className="w-3 h-3" /> Reprogramar</button>)}
+                      {task.status !== STATUS.CUMPLIDO && (
+                         <button onClick={() => { setActiveTask(task); setRescheduleWeek(task.assignedWeek); setIsRescheduleModalOpen(true); }} className="text-xs flex-1 bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 px-3 py-2 rounded-lg font-bold flex items-center justify-center gap-1 shadow-sm transition-colors"><Icon name="clock" className="w-3 h-3" /> Reprogramar</button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -978,615 +1075,41 @@ const JuniorDashboard = ({ user, tasks, categories, onAddTask, onUpdateTaskStatu
         ))
       )}
 
+      {/* MODALES DEL JUNIOR COMPLETOS */}
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Auto-Asignar Nuevo Entregable">
         <form onSubmit={handleCreateTask} className="space-y-4">
-          <div><label className="block text-sm font-bold text-[#165399] mb-1">Título <span className="text-red-500">*</span></label><input required type="text" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full px-3 py-2 border rounded-lg outline-none" /></div>
-          <div className="grid grid-cols-2 gap-4">
-            <div><label className="block text-sm font-bold text-[#165399] mb-1">Categoría <span className="text-red-500">*</span></label><select required value={formData.categoryId} onChange={e => setFormData({...formData, categoryId: e.target.value ? parseInt(e.target.value) : '', subcategory: ''})} className="w-full px-3 py-2 border rounded-lg outline-none"><option value="">Seleccione...</option>{(categories||[]).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
-            {formData.categoryId === 1 && (<div><label className="block text-sm font-bold text-[#165399] mb-1">Tipo <span className="text-red-500">*</span></label><select required value={formData.subcategory} onChange={e => setFormData({...formData, subcategory: e.target.value})} className="w-full px-3 py-2 border rounded-lg outline-none"><option value="">Seleccione...</option>{selectedCategory?.subcategories?.map((s, idx) => <option key={idx} value={s.name}>{s.name}</option>)}</select></div>)}
+          <div><label className="block text-sm font-bold text-[#165399] mb-1">Título del Producto / Entregable <span className="text-red-500">*</span></label><input required type="text" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#165399] outline-none" /></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div><label className="block text-sm font-bold text-[#165399] mb-1">Categoría <span className="text-red-500">*</span></label><select required value={formData.categoryId} onChange={e => setFormData({...formData, categoryId: e.target.value ? parseInt(e.target.value) : '', subcategory: ''})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#165399] outline-none"><option value="">Seleccione...</option>{(categories||[]).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
+            {formData.categoryId === 1 && (<div><label className="block text-sm font-bold text-[#165399] mb-1">Tipo de Documento <span className="text-red-500">*</span></label><select required value={formData.subcategory} onChange={e => setFormData({...formData, subcategory: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#165399] outline-none"><option value="">Seleccione...</option>{selectedCategory?.subcategories?.map((s, idx) => <option key={idx} value={s.name}>{s.name}</option>)}</select></div>)}
           </div>
-          <div><label className="block text-sm font-bold text-[#165399] mb-1">Semana Ejecución <span className="text-red-500">*</span></label><input type="text" value={formData.week} readOnly className="w-full px-3 py-2 border rounded-lg bg-gray-50 text-gray-600 font-bold outline-none" /></div>
-          <div className="pt-4 border-t flex justify-end gap-2"><button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 bg-gray-100 rounded-lg font-bold">Cancelar</button><button type="submit" className="px-4 py-2 bg-[#8CC63F] text-white rounded-lg font-bold">Asignar</button></div>
+          <div><label className="block text-sm font-bold text-[#165399] mb-1">Semana de Ejecución <span className="text-red-500">*</span></label><input type="text" value={formData.week} readOnly className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600 font-bold outline-none" /></div>
+          <div><label className="block text-sm font-bold text-[#165399] mb-1">Descripción / Objetivos Específicos</label><textarea rows="3" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#165399] outline-none"></textarea></div>
+          <div className="pt-4 border-t border-gray-200 flex justify-end gap-2"><button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg font-bold transition-colors">Cancelar</button><button type="submit" className="px-4 py-2 bg-[#8CC63F] text-white rounded-lg hover:bg-[#78b030] font-bold transition-colors shadow-sm">Asignar Entregable</button></div>
         </form>
       </Modal>
 
-      <Modal isOpen={reportModalOpen} onClose={() => setReportModalOpen(false)} title="Reportar Gestión">
+      <Modal isOpen={reportModalOpen} onClose={() => setReportModalOpen(false)} title="Reportar Gestión del Entregable">
         <form onSubmit={handleSubmitReport} className="space-y-4">
-          {errorMsg && <div className="p-3 bg-red-50 text-red-700 rounded-lg text-sm font-bold">{errorMsg}</div>}
-          <div><label className="block text-sm font-bold text-[#165399] mb-1">Descripción <span className="text-red-500">*</span></label><textarea required rows="4" value={reportData.description} onChange={e => setReportData({...reportData, description: e.target.value})} className="w-full px-3 py-2 border rounded-lg outline-none"></textarea></div>
-          <div><label className="block text-sm font-bold text-[#165399] mb-1">Enlace Evidencias <span className="text-red-500">*</span></label><input required type="url" value={reportData.link} onChange={e => setReportData({...reportData, link: e.target.value})} className="w-full px-3 py-2 border rounded-lg outline-none" /></div>
-          <div className={`p-4 rounded-xl border ${!canRequestContinuation ? 'bg-red-50 border-red-200' : 'bg-gray-50'}`}>
-             <label className="flex items-center gap-2 cursor-pointer"><input type="checkbox" checked={requestContinuation} onChange={(e) => setRequestContinuation(e.target.checked)} disabled={!canRequestContinuation} className="w-4 h-4 text-[#165399] rounded" /><span className={`text-sm font-bold ${!canRequestContinuation ? 'text-red-700' : 'text-gray-700'}`}>Solicitar continuar entregable próxima semana</span></label>
-             {!canRequestContinuation && (<p className="text-xs text-red-600 mt-2 ml-6 font-medium">Límite alcanzado.</p>)}
+          {errorMsg && <div className="p-3 bg-red-50 text-red-700 rounded-lg text-sm border border-red-200 font-bold shadow-sm">{errorMsg}</div>}
+          <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 shadow-sm"><p className="text-sm font-black text-[#165399]">{activeTask?.title}</p>{activeTask?.subcategory && <p className="text-xs text-[#8CC63F] font-bold mt-1">{activeTask?.subcategory}</p>}</div>
+          <div><label className="block text-sm font-bold text-[#165399] mb-1">Descripción de la Gestión Realizada <span className="text-red-500">*</span></label><textarea required rows="4" value={reportData.description} onChange={e => setReportData({...reportData, description: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#165399] outline-none"></textarea></div>
+          <div><label className="block text-sm font-bold text-[#165399] mb-1">Enlace de Soportes/Evidencias <span className="text-red-500">*</span></label><input required type="url" value={reportData.link} onChange={e => setReportData({...reportData, link: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#165399] outline-none" /></div>
+          <div className={`p-4 rounded-xl border ${!canRequestContinuation ? 'bg-red-50 border-red-200' : 'bg-gray-50 border-gray-200'}`}>
+             <label className="flex items-center gap-2 cursor-pointer"><input type="checkbox" checked={requestContinuation} onChange={(e) => setRequestContinuation(e.target.checked)} disabled={!canRequestContinuation} className="w-4 h-4 text-[#165399] rounded border-gray-300 focus:ring-[#165399]" /><span className={`text-sm font-bold ${!canRequestContinuation ? 'text-red-700' : 'text-gray-700'}`}>Solicitar continuar con el entregable la próxima semana</span></label>
+             {!canRequestContinuation && (<p className="text-xs text-red-600 mt-2 ml-6 font-medium">No es posible solicitar continuidad automáticamente. Límite alcanzado.</p>)}
           </div>
-          <div className="pt-4 flex justify-end gap-2"><button type="button" onClick={() => setReportModalOpen(false)} className="px-4 py-2 bg-gray-100 rounded-lg font-bold">Cancelar</button><button type="submit" className="px-4 py-2 bg-[#165399] text-white rounded-lg font-bold">Enviar</button></div>
-        </form>
-      </Modal>
-
-      <Modal isOpen={isRescheduleModalOpen} onClose={() => setIsRescheduleModalOpen(false)} title="Reprogramar">
-        <form onSubmit={(e) => { e.preventDefault(); onUpdateTaskData(activeTask.id, { assignedWeek: rescheduleWeek }); setIsRescheduleModalOpen(false); setActiveTask(null); }} className="space-y-4">
-          <div><label className="block text-sm font-bold text-[#165399] mb-1">Nueva semana <span className="text-red-500">*</span></label><select required value={rescheduleWeek} onChange={e => setRescheduleWeek(e.target.value)} className="w-full px-3 py-2 border rounded-lg"><option value="">Seleccione...</option>{upcomingWeeks.map(w => <option key={w} value={w}>{w}</option>)}</select></div>
-          <div className="pt-4 flex justify-end gap-2"><button type="button" onClick={() => setIsRescheduleModalOpen(false)} className="px-4 py-2 bg-gray-100 rounded-lg font-bold">Cancelar</button><button type="submit" className="px-4 py-2 bg-[#165399] text-white rounded-lg font-bold">Reprogramar</button></div>
-        </form>
-      </Modal>
-    </div>
-  );
-};
-
-/* --- MÓDULO FLUJO SUPERVISOR --- */
-const ReviewerDashboard = ({ user, tasks, categories, config, employees, measurements, onAddTask, onUpdateTaskStatus, onAddComment, onUpdateTaskData, onDeleteTask, onSaveMeasurement }) => {
-  const [activeTab, setActiveTab] = useState('TASKS'); 
-  
-  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
-  const [activeTask, setActiveTask] = useState(null);
-  const [reviewComments, setReviewComments] = useState('');
-  const [errorMsg, setErrorMsg] = useState('');
-  
-  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [authorizeContinuation, setAuthorizeContinuation] = useState(false);
-  
-  const [isGroupAssignModalOpen, setIsGroupAssignModalOpen] = useState(false);
-  const [groupFormData, setGroupFormData] = useState({ title: '', categoryId: '', subcategory: '', description: '', week: getWeekData(new Date()), assigneeIds: [] });
-  
-  const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false);
-  const [rescheduleWeek, setRescheduleWeek] = useState('');
-  const upcomingWeeks = getUpcomingWeeksList();
-  
-  const [formData, setFormData] = useState({ title: '', categoryId: '', subcategory: '', description: '', assigneeId: '', week: getWeekData(new Date()) });
-
-  const selectedCategory = (categories || []).find(c => c.id === formData.categoryId);
-  const groupSelectedCategory = (categories || []).find(c => c.id === groupFormData.categoryId);
-
-  const [filterWeek, setFilterWeek] = useState('ALL');
-  const [filterCategory, setFilterCategory] = useState('ALL');
-  const [filterStatus, setFilterStatus] = useState('ALL');
-  const [filterAssignee, setFilterAssignee] = useState('ALL');
-  const [viewScope, setViewScope] = useState('MY_TEAM');
-
-  const canSeeAll = user.role === 'Jefe' || user.role === 'Coordinador';
-  const myTeamMembers = (employees || []).filter(emp => emp.reviewerId === user.id);
-  const myTeamIds = myTeamMembers.map(emp => emp.id);
-
-  const availableJuniors = (employees || []).filter(e => e.role === 'Junior' || e.role === 'Aprendiz');
-
-  const visibleTasks = (tasks || []).filter(task => {
-    if (canSeeAll && viewScope === 'ALL') return true;
-    return myTeamIds.includes(task.assigneeId);
-  });
-
-  const filteredTasks = visibleTasks.filter(task => {
-    if (filterWeek !== 'ALL' && task.assignedWeek !== filterWeek) return false;
-    if (filterCategory !== 'ALL' && task.category !== filterCategory) return false;
-    if (filterStatus !== 'ALL' && task.status !== filterStatus) return false;
-    if (filterAssignee !== 'ALL' && task.assigneeId !== filterAssignee) return false;
-    return true;
-  });
-
-  const uniqueWeeks = [...new Set(visibleTasks.map(t => t.assignedWeek).filter(Boolean))].sort().reverse();
-  const uniqueCategories = [...new Set(visibleTasks.map(t => t.category).filter(Boolean))].sort();
-
-  const getSupervisorButtonClass = (status) => {
-    if (status === STATUS.EN_REVISION || status === STATUS.SOLICITUD_CONTINUIDAD) return "bg-[#165399] hover:bg-[#114078] text-white border border-[#165399]";
-    if (status === STATUS.CUMPLIDO) return "bg-[#8CC63F] hover:bg-[#78b030] text-white border border-[#8CC63F]";
-    if (status === STATUS.CON_OBSERVACIONES) return "bg-yellow-500 hover:bg-yellow-600 text-white border border-yellow-500";
-    if (status === STATUS.NO_CUMPLIDO) return "bg-red-600 hover:bg-red-700 text-white border border-red-600";
-    return "bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300";
-  };
-
-  const handleReview = (decisionStatus) => {
-    if ((decisionStatus === STATUS.CON_OBSERVACIONES || decisionStatus === STATUS.NO_CUMPLIDO) && !reviewComments.trim()) {
-      setErrorMsg('Debe ingresar observaciones obligatoriamente si solicita ajustes o rechaza el entregable.'); return;
-    }
-    setErrorMsg('');
-    if (reviewComments.trim()) {
-      onAddComment(activeTask.id, { id: Date.now().toString(), author: user.name, text: reviewComments, date: getCurrentDateFormatted() });
-    }
-
-    if (authorizeContinuation && !activeTask.continuationSpawned) {
-      const nextWeek = getNextWeekData(activeTask.assignedWeek);
-      const continuationTask = { ...activeTask, id: Date.now().toString() + '-cont', assignedWeek: nextWeek, status: STATUS.ASIGNADO, continuedCount: (activeTask.continuedCount || 0) + 1, comments: [], managementDescription: '', evidenceLink: '', continuationSpawned: false };
-      onAddTask(continuationTask);
-      onUpdateTaskData(activeTask.id, { status: decisionStatus, continuationSpawned: true });
-    } else {
-       onUpdateTaskStatus(activeTask.id, decisionStatus);
-    }
-    setIsReviewModalOpen(false); setActiveTask(null); setReviewComments('');
-  };
-
-  const handleCreateTask = (e) => {
-    e.preventDefault();
-    const taskSubcategoryObj = selectedCategory?.subcategories?.find(s => s.name === formData.subcategory);
-    const deadlineInfo = (formData.categoryId === 1 && taskSubcategoryObj?.maxWeeks) ? `Máximo ${taskSubcategoryObj.maxWeeks} semana(s)` : 'Sin límite estricto';
-    onAddTask({ id: Date.now().toString(), title: formData.title, description: formData.description, category: selectedCategory?.name || 'General', subcategory: formData.categoryId === 1 ? formData.subcategory : '', deadlineInfo, assignedWeek: formData.week, assigneeId: formData.assigneeId, reviewerId: (employees || []).find(emp => emp.id === formData.assigneeId)?.reviewerId || user.id, status: STATUS.ASIGNADO, createdAt: getCurrentDateFormatted(), comments: [], managementDescription: '', evidenceLink: '', continuedCount: 0, allowExtraTime: false });
-    setIsAssignModalOpen(false); setFormData({ title: '', categoryId: '', subcategory: '', description: '', assigneeId: '', week: getWeekData(new Date()) });
-  };
-
-  const handleCreateGroupTask = (e) => {
-    e.preventDefault();
-    if (groupFormData.assigneeIds.length === 0) { alert("Seleccione al menos un profesional."); return; }
-    const taskSubcategoryObj = groupSelectedCategory?.subcategories?.find(s => s.name === groupFormData.subcategory);
-    const deadlineInfo = (groupFormData.categoryId === 1 && taskSubcategoryObj?.maxWeeks) ? `Máximo ${taskSubcategoryObj.maxWeeks} semana(s)` : 'Sin límite estricto';
-
-    groupFormData.assigneeIds.forEach((assigneeId, index) => {
-      onAddTask({ id: Date.now().toString() + '-' + index, title: groupFormData.title, description: groupFormData.description, category: groupSelectedCategory?.name || 'General', subcategory: groupFormData.categoryId === 1 ? groupFormData.subcategory : '', deadlineInfo, assignedWeek: groupFormData.week, assigneeId: assigneeId, reviewerId: (employees || []).find(emp => emp.id === assigneeId)?.reviewerId || user.id, status: STATUS.ASIGNADO, createdAt: getCurrentDateFormatted(), comments: [], managementDescription: '', evidenceLink: '', continuedCount: 0, allowExtraTime: false });
-    });
-    setIsGroupAssignModalOpen(false); setGroupFormData({ title: '', categoryId: '', subcategory: '', description: '', week: getWeekData(new Date()), assigneeIds: [] });
-    alert(`Asignados ${groupFormData.assigneeIds.length} entregables.`);
-  };
-
-  const openEditModal = (task) => {
-    setActiveTask(task); const cat = (categories || []).find(c => c.name === task.category);
-    setFormData({ title: task.title || '', categoryId: cat ? cat.id : '', subcategory: task.subcategory || '', description: task.description || '', assigneeId: task.assigneeId || '', week: task.assignedWeek || '' });
-    setIsEditModalOpen(true);
-  };
-
-  const handleUpdateTaskDetails = (e) => {
-    e.preventDefault();
-    const cat = (categories || []).find(c => c.id === formData.categoryId);
-    const taskSubcategoryObj = cat?.subcategories?.find(s => s.name === formData.subcategory);
-    const deadlineInfo = (formData.categoryId === 1 && taskSubcategoryObj?.maxWeeks) ? `Máximo ${taskSubcategoryObj.maxWeeks} semana(s)` : 'Sin límite estricto';
-    onUpdateTaskData(activeTask.id, { title: formData.title, category: cat?.name || 'General', subcategory: formData.categoryId === 1 ? formData.subcategory : '', description: formData.description, assigneeId: formData.assigneeId, reviewerId: (employees || []).find(emp => emp.id === formData.assigneeId)?.reviewerId || user.id, assignedWeek: formData.week, deadlineInfo });
-    setIsEditModalOpen(false); setActiveTask(null); setFormData({ title: '', categoryId: '', subcategory: '', description: '', assigneeId: '', week: getWeekData(new Date()) });
-  };
-
-  const handleReschedule = (e) => {
-    e.preventDefault();
-    onUpdateTaskData(activeTask.id, { assignedWeek: rescheduleWeek });
-    setIsRescheduleModalOpen(false); setActiveTask(null);
-  };
-
-  const groupedTasks = groupTasksByWeek(filteredTasks);
-  const isPendingReviewAction = activeTask && (activeTask.status === STATUS.ASIGNADO || activeTask.status === STATUS.EN_PROGRESO || activeTask.status === STATUS.NO_REPORTADO);
-
-  return (
-    <div className="space-y-6">
-      <DashboardMetrics tasks={filteredTasks} employees={employees} />
-
-      <div className="flex bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
-         <button onClick={() => setActiveTab('TASKS')} className={`flex-1 py-4 font-black text-sm transition-colors flex items-center justify-center gap-2 ${activeTab === 'TASKS' ? 'bg-[#165399] text-white' : 'text-gray-500 hover:bg-gray-50'}`}>
-            <Icon name="activity" className="w-5 h-5"/> Seguimiento a Entregables
-         </button>
-         <button onClick={() => setActiveTab('INDICATORS')} className={`flex-1 py-4 font-black text-sm transition-colors flex items-center justify-center gap-2 ${activeTab === 'INDICATORS' ? 'bg-[#8CC63F] text-white' : 'text-gray-500 hover:bg-gray-50'}`}>
-            <Icon name="target" className="w-5 h-5"/> Medición de Indicadores
-         </button>
-      </div>
-
-      {activeTab === 'INDICATORS' ? (
-         <IndicatorsManager user={user} tasks={tasks} employees={employees} config={config} measurements={measurements} onSaveMeasurement={onSaveMeasurement} />
-      ) : (
-        <div className="space-y-6">
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 border-t-8 border-t-[#165399] mb-6">
-            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
-              <div>
-                <h2 className="text-xl font-black text-[#165399]">Gestión de Productos</h2>
-                <p className="text-sm text-gray-500 font-medium">Revise y gestione los productos asignados a su equipo.</p>
-              </div>
-              <div className="flex gap-2 flex-wrap lg:flex-nowrap">
-                {canSeeAll && (
-                  <div className="flex bg-gray-100 p-1 rounded-lg border border-gray-200">
-                    <button onClick={() => setViewScope('MY_TEAM')} className={`px-4 py-2 text-sm font-bold rounded-md transition-colors ${viewScope === 'MY_TEAM' ? 'bg-white text-[#165399] shadow-sm' : 'text-gray-500 hover:text-gray-800'}`}>Mi Equipo Directo</button>
-                    <button onClick={() => setViewScope('ALL')} className={`px-4 py-2 text-sm font-bold rounded-md transition-colors ${viewScope === 'ALL' ? 'bg-white text-[#165399] shadow-sm' : 'text-gray-500 hover:text-gray-800'}`}>Todo el Equipo</button>
-                  </div>
-                )}
-                <button onClick={() => { setGroupFormData(prev => ({...prev, assigneeIds: availableJuniors.map(e=>e.id)})); setIsGroupAssignModalOpen(true); }} className="flex items-center gap-2 bg-[#165399] hover:bg-[#114078] text-white px-4 py-2 rounded-lg font-bold transition-colors shadow-sm">
-                  <Icon name="users" className="w-5 h-5" /> Asignación Grupal
-                </button>
-                <button onClick={() => setIsAssignModalOpen(true)} className="flex items-center gap-2 bg-[#8CC63F] hover:bg-[#78b030] text-white px-4 py-2 rounded-lg font-bold transition-colors shadow-sm">
-                  <Icon name="plus" className="w-5 h-5" /> Individual
-                </button>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pt-4 border-t border-gray-100">
-              <div>
-                <label className="block text-[10px] font-black text-[#165399] uppercase tracking-widest mb-1">Semana</label>
-                <select value={filterWeek} onChange={e => setFilterWeek(e.target.value)} className="w-full text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#165399] font-medium bg-gray-50 px-3 py-2 outline-none">
-                  <option value="ALL">Todas las semanas</option>
-                  {uniqueWeeks.map(w => <option key={w} value={w}>{w}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="block text-[10px] font-black text-[#165399] uppercase tracking-widest mb-1">Profesional</label>
-                <select value={filterAssignee} onChange={e => setFilterAssignee(e.target.value)} className="w-full text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#165399] font-medium bg-gray-50 px-3 py-2 outline-none">
-                  <option value="ALL">Todos los profesionales</option>
-                  <optgroup label="Mi Equipo Directo">
-                    {(employees || []).filter(e => myTeamIds.includes(e.id)).map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
-                  </optgroup>
-                  {canSeeAll && viewScope === 'ALL' && (
-                    <optgroup label="Otros Profesionales">
-                      {(employees || []).filter(e => !myTeamIds.includes(e.id) && (e.role === 'Junior' || e.role === 'Aprendiz')).map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
-                    </optgroup>
-                  )}
-                </select>
-              </div>
-              <div>
-                <label className="block text-[10px] font-black text-[#165399] uppercase tracking-widest mb-1">Categoría</label>
-                <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)} className="w-full text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#165399] font-medium bg-gray-50 px-3 py-2 outline-none">
-                  <option value="ALL">Todas las categorías</option>
-                  {uniqueCategories.map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="block text-[10px] font-black text-[#165399] uppercase tracking-widest mb-1">Estado</label>
-                <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className="w-full text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#165399] font-medium bg-gray-50 px-3 py-2 outline-none">
-                  <option value="ALL">Todos los estados</option>
-                  {Object.values(STATUS).map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
-              </div>
-            </div>
-          </div>
-
-          {Object.keys(groupedTasks).length === 0 ? (
-             <p className="text-center text-gray-500 py-10 font-bold">No se encontraron entregables.</p>
-          ) : (
-            Object.entries(groupedTasks).map(([weekLabel, weekTasks]) => (
-              <div key={weekLabel} className="mb-8">
-                <h3 className="text-lg font-black text-[#165399] mb-4 border-b-2 border-gray-200 pb-2 flex items-center gap-2">
-                  <Icon name="clock" className="w-6 h-6 text-[#8CC63F]" /> {weekLabel}
-                </h3>
-                {Object.entries(weekTasks.reduce((acc, t) => { acc[t.assigneeId] = acc[t.assigneeId] || []; acc[t.assigneeId].push(t); return acc; }, {})).map(([assigneeId, assigneeTasks]) => {
-                   const assignee = getAssigneeName(assigneeId, employees);
-                   return (
-                     <div key={assigneeId} className="mb-6 ml-4 border-l-4 border-[#8CC63F] pl-4">
-                       <h4 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
-                         <Icon name="user" className="w-5 h-5 text-[#8CC63F]" /> {assignee}
-                         <span className="text-xs font-bold text-white bg-[#AAB4C2] px-2 py-0.5 rounded-full shadow-sm">{assigneeTasks.length} tareas</span>
-                       </h4>
-                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                          {assigneeTasks.map(task => (
-                            <div key={task.id} className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow flex flex-col overflow-hidden">
-                              <div className="p-4 flex-1 flex flex-col">
-                                <div className="flex justify-between items-start mb-2">
-                                  <Badge status={task.status} />
-                                  <span className="text-[10px] font-black text-[#165399] bg-blue-50 px-2 py-1 rounded truncate max-w-[120px] border border-blue-100" title={task.category}>{task.category}</span>
-                                </div>
-                                <h4 className="font-bold text-gray-800 text-sm mb-1">{task.title}</h4>
-                                {task.subcategory && <p className="text-xs text-[#8CC63F] font-bold mb-3">{task.subcategory}</p>}
-                                <div className="flex items-center text-xs text-gray-500 font-medium gap-1 mt-auto pt-3 border-t border-gray-50">
-                                  <Icon name="clock" className="w-4 h-4 text-[#AAB4C2]" />
-                                  Límite: {task.deadlineInfo}
-                                  {(task.continuedCount > 0) && <span className="ml-2 font-bold text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded border border-orange-200">Semana {task.continuedCount + 1}</span>}
-                                </div>
-                              </div>
-                              <div className="bg-gray-50 px-4 py-3 border-t border-gray-200 flex flex-wrap gap-2">
-                                <button onClick={() => { setActiveTask(task); setIsReviewModalOpen(true); setReviewComments(''); setErrorMsg(''); setAuthorizeContinuation(task.status === STATUS.SOLICITUD_CONTINUIDAD); }} className={`text-[11px] flex-1 min-w-[100px] px-2 py-2 rounded-lg font-bold flex items-center justify-center gap-1 shadow-sm transition-colors ${getSupervisorButtonClass(task.status)}`}>
-                                   <Icon name="check" className="w-3 h-3" /> {(task.status === STATUS.EN_REVISION || task.status === STATUS.SOLICITUD_CONTINUIDAD) ? 'Evaluar Entregable' : (task.status === STATUS.ASIGNADO || task.status === STATUS.EN_PROGRESO || task.status === STATUS.NO_REPORTADO) ? 'Ver Estado' : 'Modificar Revisión'}
-                                </button>
-                                <button onClick={() => openEditModal(task)} className="text-[11px] flex-1 min-w-[70px] bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 px-2 py-2 rounded-lg font-bold flex items-center justify-center gap-1 shadow-sm transition-colors">
-                                  <Icon name="edit" className="w-3 h-3" /> Editar
-                                </button>
-                                <button onClick={() => { setActiveTask(task); setRescheduleWeek(task.assignedWeek); setIsRescheduleModalOpen(true); }} className="text-[11px] bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 px-2 py-2 rounded-lg font-bold flex items-center justify-center shadow-sm transition-colors" title="Reprogramar Semana">
-                                  <Icon name="clock" className="w-4 h-4" />
-                                </button>
-                                {(task.status === STATUS.ASIGNADO || task.status === STATUS.EN_PROGRESO || task.status === STATUS.NO_REPORTADO) && (
-                                  <button onClick={() => { if(window.confirm('¿Seguro que desea eliminar este entregable? Esta acción es irreversible.')) onDeleteTask(task.id); }} className="text-[11px] bg-red-50 border border-red-200 text-red-600 hover:bg-red-100 px-2 py-2 rounded-lg font-bold flex items-center justify-center shadow-sm transition-colors" title="Eliminar Entregable">
-                                    <Icon name="trash" className="w-4 h-4" />
-                                  </button>
-                                )}
-                              </div>
-                            </div>
-                          ))}
-                       </div>
-                     </div>
-                   );
-                })}
-              </div>
-            ))
-          )}
-        </div>
-      )}
-
-      {/* --- MODALES DEL SUPERVISOR --- */}
-      <Modal isOpen={isReviewModalOpen} onClose={() => setIsReviewModalOpen(false)} title="Evaluación de Entregable">
-        {activeTask && (
-          <div className="space-y-4">
-            <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col md:flex-row justify-between items-start gap-4">
-              <div className="flex-1">
-                <h4 className="font-black text-[#165399] text-lg mb-1">{activeTask.title}</h4>
-                <div className="text-xs text-gray-700 mb-2 font-medium">Categoría: {activeTask.category} {activeTask.subcategory && `(${activeTask.subcategory})`}</div>
-                <div className="text-xs text-gray-700 font-bold text-[#165399]">Profesional a cargo: {getAssigneeName(activeTask.assigneeId, employees)}</div>
-              </div>
-              <div className="flex-shrink-0"><Badge status={activeTask.status} /></div>
-            </div>
-            <div className="bg-gray-50 p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col">
-              <h5 className="font-black text-[#165399] mb-3 text-sm uppercase tracking-widest border-b border-gray-200 pb-2">Reporte de Gestión del Profesional</h5>
-              {activeTask.managementDescription ? (
-                <div className="flex-1 flex flex-col">
-                  <p className="text-sm text-gray-800 mb-5 whitespace-pre-wrap font-medium flex-1">{activeTask.managementDescription}</p>
-                  {activeTask.evidenceLink && (<a href={activeTask.evidenceLink} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-2 bg-[#8CC63F] hover:bg-[#78b030] text-white font-bold text-sm px-6 py-3 rounded-lg shadow-md transition-colors w-full sm:w-auto self-start"><Icon name="link" className="w-5 h-5" /> Abrir Soportes / Evidencias</a>)}
-                </div>
-              ) : (<p className="text-sm text-gray-500 italic font-medium flex-1 flex items-center justify-center py-6 bg-white rounded-lg border border-dashed border-gray-300">No se ha registrado reporte de gestión.</p>)}
-            </div>
-            {errorMsg && <div className="p-3 bg-red-50 text-red-700 rounded-lg text-sm border border-red-200 font-bold shadow-sm">{errorMsg}</div>}
-            {isPendingReviewAction ? (
-              <div className="p-4 bg-yellow-50 border border-yellow-300 rounded-xl text-yellow-800 text-sm font-bold flex items-start gap-3 shadow-sm"><Icon name="alert" className="w-6 h-6 flex-shrink-0 text-yellow-600" />No puede evaluar este entregable porque el profesional aún no lo ha enviado a revisión. (Estado: {activeTask.status})</div>
-            ) : (
-              <div className="pt-4 border-t border-gray-200">
-                <div className="mb-4">
-                  <label className="block text-sm font-bold text-[#165399] mb-2">Observaciones / Feedback de Revisión</label>
-                  <textarea rows="3" value={reviewComments} onChange={e => setReviewComments(e.target.value)} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#165399] outline-none text-sm" placeholder="Ingrese sus observaciones (Obligatorio si solicita ajustes o rechaza)..."></textarea>
-                </div>
-                {!activeTask.continuationSpawned && (
-                  <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input type="checkbox" checked={authorizeContinuation} onChange={(e) => setAuthorizeContinuation(e.target.checked)} className="w-4 h-4 text-[#165399] rounded border-gray-300 focus:ring-[#165399]" />
-                      <span className="text-sm font-bold text-[#165399]">{activeTask?.status === STATUS.SOLICITUD_CONTINUIDAD ? "📌 El profesional solicitó continuidad. " : ""} Autorizar y crear entregable para la próxima semana</span>
-                    </label>
-                  </div>
-                )}
-                <div className="flex flex-col sm:flex-row justify-end gap-3">
-                  <button type="button" onClick={() => setIsReviewModalOpen(false)} className="px-5 py-2.5 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg font-bold text-sm transition-colors text-center order-last sm:order-first">Cancelar</button>
-                  <div className="flex gap-2 w-full sm:w-auto flex-wrap">
-                    <button onClick={() => handleReview(STATUS.NO_CUMPLIDO)} className="px-4 py-2.5 border border-red-500 bg-red-50 text-red-700 rounded-lg font-bold text-sm">Rechazar (No Cumplido)</button>
-                    <button onClick={() => handleReview(STATUS.CON_OBSERVACIONES)} className="px-4 py-2.5 border border-yellow-500 bg-yellow-50 text-yellow-700 rounded-lg font-bold text-sm">Solicitar Ajustes</button>
-                    <button onClick={() => handleReview(STATUS.CUMPLIDO)} className="px-6 py-2.5 bg-[#8CC63F] text-white rounded-lg font-bold text-sm">Aprobar (Cumplido)</button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-      </Modal>
-
-      <Modal isOpen={isAssignModalOpen} onClose={() => setIsAssignModalOpen(false)} title="Asignar Entregable a Profesional">
-        <form onSubmit={handleCreateTask} className="space-y-4">
-          <div>
-            <label className="block text-sm font-bold text-[#165399] mb-1">Profesional <span className="text-red-500">*</span></label>
-            <select required value={formData.assigneeId} onChange={e => setFormData({...formData, assigneeId: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-[#165399] outline-none">
-              <option value="">Seleccione a quién asignar...</option>
-              {canSeeAll ? (<><optgroup label="Mi Equipo Directo">{(employees || []).filter(e => myTeamIds.includes(e.id)).map(e => <option key={e.id} value={e.id}>{e.name}</option>)}</optgroup><optgroup label="Otros Profesionales">{(employees || []).filter(e => !myTeamIds.includes(e.id) && (e.role === 'Junior' || e.role === 'Aprendiz')).map(e => <option key={e.id} value={e.id}>{e.name}</option>)}</optgroup></>) : (employees || []).filter(e => myTeamIds.includes(e.id)).map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
-            </select>
-          </div>
-          <div><label className="block text-sm font-bold text-[#165399] mb-1">Título <span className="text-red-500">*</span></label><input required type="text" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full px-3 py-2 border rounded-lg" /></div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div><label className="block text-sm font-bold text-[#165399] mb-1">Categoría <span className="text-red-500">*</span></label><select required value={formData.categoryId} onChange={e => setFormData({...formData, categoryId: e.target.value ? parseInt(e.target.value) : '', subcategory: ''})} className="w-full px-3 py-2 border rounded-lg"><option value="">Seleccione...</option>{(categories || []).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
-            {formData.categoryId === 1 && (<div><label className="block text-sm font-bold text-[#165399] mb-1">Tipo <span className="text-red-500">*</span></label><select required value={formData.subcategory} onChange={e => setFormData({...formData, subcategory: e.target.value})} className="w-full px-3 py-2 border rounded-lg"><option value="">Seleccione...</option>{selectedCategory?.subcategories?.map((s, idx) => <option key={idx} value={s.name}>{s.name}</option>)}</select></div>)}
-          </div>
-          <div><label className="block text-sm font-bold text-[#165399] mb-1">Semana de Ejecución <span className="text-red-500">*</span></label><input required type="text" value={formData.week} onChange={e => setFormData({...formData, week: e.target.value})} className="w-full px-3 py-2 border rounded-lg" /></div>
-          <div><label className="block text-sm font-bold text-[#165399] mb-1">Descripción</label><textarea rows="3" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="w-full px-3 py-2 border rounded-lg"></textarea></div>
-          <div className="pt-4 border-t flex justify-end gap-2"><button type="button" onClick={() => setIsAssignModalOpen(false)} className="px-4 py-2 bg-gray-100 rounded-lg font-bold">Cancelar</button><button type="submit" className="px-4 py-2 bg-[#8CC63F] text-white rounded-lg font-bold">Asignar Entregable</button></div>
-        </form>
-      </Modal>
-
-      <Modal isOpen={isGroupAssignModalOpen} onClose={() => setIsGroupAssignModalOpen(false)} title="Asignación Grupal de Entregable (Colaboración)">
-        <form onSubmit={handleCreateGroupTask} className="space-y-4">
-          <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-            <div className="flex justify-between items-center mb-2">
-              <label className="block text-sm font-bold text-[#165399]">Seleccione los profesionales <span className="text-red-500">*</span></label>
-              <button type="button" onClick={() => { groupFormData.assigneeIds.length === availableJuniors.length ? setGroupFormData({...groupFormData, assigneeIds: []}) : setGroupFormData({...groupFormData, assigneeIds: availableJuniors.map(e=>e.id)}); }} className="text-xs text-[#165399] font-bold bg-white px-2 py-1 rounded shadow-sm">{groupFormData.assigneeIds.length === availableJuniors.length ? 'Deseleccionar todos' : 'Seleccionar todos'}</button>
-            </div>
-            <div className="max-h-32 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-2 bg-white p-2 rounded">
-              {availableJuniors.map(emp => (
-                 <label key={emp.id} className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer"><input type="checkbox" checked={groupFormData.assigneeIds.includes(emp.id)} onChange={(e) => { e.target.checked ? setGroupFormData({...groupFormData, assigneeIds: [...groupFormData.assigneeIds, emp.id]}) : setGroupFormData({...groupFormData, assigneeIds: groupFormData.assigneeIds.filter(id => id !== emp.id)}); }} className="rounded text-[#165399]" />{emp.name}</label>
-              ))}
-            </div>
-          </div>
-          <div><label className="block text-sm font-bold text-[#165399] mb-1">Título <span className="text-red-500">*</span></label><input required type="text" value={groupFormData.title} onChange={e => setGroupFormData({...groupFormData, title: e.target.value})} className="w-full px-3 py-2 border rounded-lg" /></div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div><label className="block text-sm font-bold text-[#165399] mb-1">Categoría <span className="text-red-500">*</span></label><select required value={groupFormData.categoryId} onChange={e => setGroupFormData({...groupFormData, categoryId: e.target.value ? parseInt(e.target.value) : '', subcategory: ''})} className="w-full px-3 py-2 border rounded-lg"><option value="">Seleccione...</option>{(categories || []).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
-            {groupFormData.categoryId === 1 && (<div><label className="block text-sm font-bold text-[#165399] mb-1">Tipo <span className="text-red-500">*</span></label><select required value={groupFormData.subcategory} onChange={e => setGroupFormData({...groupFormData, subcategory: e.target.value})} className="w-full px-3 py-2 border rounded-lg"><option value="">Seleccione...</option>{groupSelectedCategory?.subcategories?.map((s, idx) => <option key={idx} value={s.name}>{s.name}</option>)}</select></div>)}
-          </div>
-          <div><label className="block text-sm font-bold text-[#165399] mb-1">Semana <span className="text-red-500">*</span></label><input required type="text" value={groupFormData.week} onChange={e => setGroupFormData({...groupFormData, week: e.target.value})} className="w-full px-3 py-2 border rounded-lg" /></div>
-          <div><label className="block text-sm font-bold text-[#165399] mb-1">Descripción</label><textarea rows="3" value={groupFormData.description} onChange={e => setGroupFormData({...groupFormData, description: e.target.value})} className="w-full px-3 py-2 border rounded-lg"></textarea></div>
-          <div className="pt-4 border-t flex justify-end gap-2"><button type="button" onClick={() => setIsGroupAssignModalOpen(false)} className="px-4 py-2 bg-gray-100 rounded-lg font-bold">Cancelar</button><button type="submit" className="px-4 py-2 bg-[#165399] text-white rounded-lg font-bold">Asignar a Grupo</button></div>
-        </form>
-      </Modal>
-
-      <Modal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} title="Editar Datos del Entregable">
-        <form onSubmit={handleUpdateTaskDetails} className="space-y-4">
-          <div>
-            <label className="block text-sm font-bold text-[#165399] mb-1">Profesional <span className="text-red-500">*</span></label>
-            <select required value={formData.assigneeId} onChange={e => setFormData({...formData, assigneeId: e.target.value})} className="w-full px-3 py-2 border rounded-lg">
-              <option value="">Seleccione a quién asignar...</option>
-              {canSeeAll ? (<><optgroup label="Mi Equipo Directo">{(employees || []).filter(e => myTeamIds.includes(e.id)).map(e => <option key={e.id} value={e.id}>{e.name}</option>)}</optgroup><optgroup label="Otros Profesionales">{(employees || []).filter(e => !myTeamIds.includes(e.id) && (e.role === 'Junior' || e.role === 'Aprendiz')).map(e => <option key={e.id} value={e.id}>{e.name}</option>)}</optgroup></>) : (employees || []).filter(e => myTeamIds.includes(e.id)).map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
-            </select>
-          </div>
-          <div><label className="block text-sm font-bold text-[#165399] mb-1">Título <span className="text-red-500">*</span></label><input required type="text" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full px-3 py-2 border rounded-lg" /></div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div><label className="block text-sm font-bold text-[#165399] mb-1">Categoría <span className="text-red-500">*</span></label><select required value={formData.categoryId} onChange={e => setFormData({...formData, categoryId: e.target.value ? parseInt(e.target.value) : '', subcategory: ''})} className="w-full px-3 py-2 border rounded-lg"><option value="">Seleccione...</option>{(categories || []).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
-            {formData.categoryId === 1 && (<div><label className="block text-sm font-bold text-[#165399] mb-1">Tipo <span className="text-red-500">*</span></label><select required value={formData.subcategory} onChange={e => setFormData({...formData, subcategory: e.target.value})} className="w-full px-3 py-2 border rounded-lg"><option value="">Seleccione...</option>{selectedCategory?.subcategories?.map((s, idx) => <option key={idx} value={s.name}>{s.name}</option>)}</select></div>)}
-          </div>
-          <div><label className="block text-sm font-bold text-[#165399] mb-1">Semana <span className="text-red-500">*</span></label><input required type="text" value={formData.week} onChange={e => setFormData({...formData, week: e.target.value})} className="w-full px-3 py-2 border rounded-lg" /></div>
-          <div><label className="block text-sm font-bold text-[#165399] mb-1">Descripción</label><textarea rows="3" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="w-full px-3 py-2 border rounded-lg"></textarea></div>
-          <div className="pt-4 border-t flex justify-end gap-2"><button type="button" onClick={() => setIsEditModalOpen(false)} className="px-4 py-2 bg-gray-100 rounded-lg font-bold">Cancelar</button><button type="submit" className="px-4 py-2 bg-[#165399] text-white rounded-lg font-bold">Guardar</button></div>
+          <div className="pt-4 border-t border-gray-200 flex justify-end gap-2"><button type="button" onClick={() => setReportModalOpen(false)} className="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg font-bold transition-colors">Cancelar</button><button type="submit" className="px-4 py-2 bg-[#165399] text-white rounded-lg hover:bg-[#114078] font-bold transition-colors shadow-sm">Guardar y Enviar a Revisión</button></div>
         </form>
       </Modal>
 
       <Modal isOpen={isRescheduleModalOpen} onClose={() => setIsRescheduleModalOpen(false)} title="Reprogramar Entregable">
         <form onSubmit={handleReschedule} className="space-y-4">
           <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 shadow-sm mb-4"><p className="text-sm font-black text-[#165399]">{activeTask?.title}</p><p className="text-xs font-bold text-gray-600 mt-1">Semana actual: {activeTask?.assignedWeek}</p></div>
-          <div><label className="block text-sm font-bold text-[#165399] mb-1">Seleccione la nueva semana <span className="text-red-500">*</span></label><select required value={rescheduleWeek} onChange={e => setRescheduleWeek(e.target.value)} className="w-full px-3 py-2 border rounded-lg"><option value="">Seleccione...</option>{upcomingWeeks.map(w => <option key={w} value={w}>{w}</option>)}</select></div>
-          <div className="pt-4 border-t flex justify-end gap-2"><button type="button" onClick={() => setIsRescheduleModalOpen(false)} className="px-4 py-2 bg-gray-100 rounded-lg font-bold">Cancelar</button><button type="submit" className="px-4 py-2 bg-[#165399] text-white rounded-lg font-bold">Guardar Reprogramación</button></div>
+          <div><label className="block text-sm font-bold text-[#165399] mb-1">Seleccione la nueva semana de ejecución <span className="text-red-500">*</span></label><select required value={rescheduleWeek} onChange={e => setRescheduleWeek(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#165399] outline-none"><option value="">Seleccione...</option>{upcomingWeeks.map(w => <option key={w} value={w}>{w}</option>)}</select></div>
+          <div className="pt-4 border-t border-gray-200 flex justify-end gap-2"><button type="button" onClick={() => setIsRescheduleModalOpen(false)} className="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg font-bold transition-colors">Cancelar</button><button type="submit" className="px-4 py-2 bg-[#165399] text-white rounded-lg hover:bg-[#114078] font-bold transition-colors shadow-sm">Guardar Reprogramación</button></div>
         </form>
       </Modal>
-    </div>
-  );
-};
-
-/* --- APLICACIÓN PRINCIPAL CON FLUJO SEGURO --- */
-const App = () => {
-  const [firebaseUser, setFirebaseUser] = useState(null); 
-  const [authError, setAuthError] = useState('');
-  
-  const [tasks, setTasks] = useState([]);
-  const [measurements, setMeasurements] = useState([]);
-  const [appConfig, setAppConfig] = useState({ employees: DEFAULT_EMPLOYEES, categories: DEFAULT_CATEGORIES, indicators: DEFAULT_INDICATORS });
-  const [isDbReady, setIsDbReady] = useState(false);
-  const [dashboardMode, setDashboardMode] = useState('TRACKING'); 
-
-  useEffect(() => {
-    if (!auth) { setIsDbReady(true); return; }
-    const unsub = onAuthStateChanged(auth, (user) => { setFirebaseUser(user); setIsDbReady(true); });
-    return () => unsub();
-  }, []);
-
-  useEffect(() => {
-    if (!isDbReady || !firebaseUser || !db) return;
-    
-    const tasksRef = collection(db, 'artifacts', appId, 'public', 'data', 'emssanar_tasks');
-    const unsubTasks = onSnapshot(tasksRef, (snapshot) => {
-      const data = []; snapshot.forEach(doc => data.push(doc.data())); setTasks(data);
-    }, (err) => console.error(err));
-
-    const measRef = collection(db, 'artifacts', appId, 'public', 'data', 'emssanar_measurements');
-    const unsubMeas = onSnapshot(measRef, (snapshot) => {
-      const data = []; snapshot.forEach(doc => data.push(doc.data())); setMeasurements(data);
-    }, (err) => console.error(err));
-
-    const configRef = doc(db, 'artifacts', appId, 'public', 'data', 'emssanar_settings', 'main_config');
-    const unsubConfig = onSnapshot(configRef, (docSnap) => {
-      if (docSnap.exists()) {
-        const dbData = docSnap.data();
-        const mergedEmployees = (dbData.employees || []).map(dbEmp => {
-           if (!dbEmp.email) {
-              const defEmp = DEFAULT_EMPLOYEES.find(d => d.id === dbEmp.id);
-              return { ...dbEmp, email: defEmp ? defEmp.email : '' };
-           }
-           return dbEmp;
-        });
-        const mergedIndicators = dbData.indicators && dbData.indicators.length > 0 ? dbData.indicators : DEFAULT_INDICATORS;
-        const mergedCategories = dbData.categories && dbData.categories.length > 0 ? dbData.categories : DEFAULT_CATEGORIES;
-        
-        setAppConfig({ ...dbData, employees: mergedEmployees, indicators: mergedIndicators, categories: mergedCategories });
-      } else {
-        setDoc(configRef, { employees: DEFAULT_EMPLOYEES, categories: DEFAULT_CATEGORIES, indicators: DEFAULT_INDICATORS });
-        setAppConfig({ employees: DEFAULT_EMPLOYEES, categories: DEFAULT_CATEGORIES, indicators: DEFAULT_INDICATORS });
-      }
-    }, (err) => console.error(err));
-
-    return () => { unsubTasks(); unsubConfig(); unsubMeas(); };
-  }, [isDbReady, firebaseUser]);
-
-  const currentUser = useMemo(() => {
-    if (!firebaseUser || !appConfig.employees) return null;
-    return appConfig.employees.find(emp => emp.email?.toLowerCase() === firebaseUser.email?.toLowerCase());
-  }, [firebaseUser, appConfig]);
-
-  useEffect(() => {
-    if (tasks.length === 0 || !isDbReady || !currentUser) return;
-    const checkOverdue = async () => {
-      const now = new Date();
-      const myOverdueTasks = tasks.filter(t => t.assigneeId === currentUser.id && (t.status === STATUS.ASIGNADO || t.status === STATUS.EN_PROGRESO) && t.assignedWeek);
-      
-      for (const t of myOverdueTasks) {
-        if (!t.assignedWeek) continue;
-        const match = t.assignedWeek.match(/al (\d{2})\/(\d{2})\/(\d{2})/);
-        if (match) {
-           const day = parseInt(match[1], 10); const month = parseInt(match[2], 10) - 1; const year = parseInt(match[3], 10) + 2000;
-           const friday = new Date(year, month, day, 23, 59, 59);
-           if (now > friday && db) {
-               try { await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'emssanar_tasks', t.id), { status: STATUS.NO_REPORTADO }); } catch (e) {}
-           }
-        }
-      }
-    };
-    const timer = setInterval(checkOverdue, 60000);
-    return () => clearInterval(timer);
-  }, [tasks, isDbReady, currentUser]);
-
-  const pendingReviewsCount = useMemo(() => {
-    if (!currentUser || !currentUser.canReview) return 0;
-    return tasks.filter(t => t.reviewerId === currentUser.id && (t.status === STATUS.EN_REVISION || t.status === STATUS.SOLICITUD_CONTINUIDAD)).length;
-  }, [tasks, currentUser]);
-
-  const handleLogin = async (email, password) => {
-    if (!auth) return;
-    try {
-      setAuthError(''); await signInWithEmailAndPassword(auth, email, password);
-    } catch (error) {
-      if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
-        setAuthError('Correo o contraseña incorrectos.');
-      } else { setAuthError('Error: ' + error.message); }
-    }
-  };
-
-  const handleLogout = async () => { if (auth) await signOut(auth); setFirebaseUser(null); };
-
-  if (!isDbReady) return <div className="min-h-screen bg-gray-100 flex items-center justify-center font-bold text-[#165399]">Cargando plataforma segura...</div>;
-  if (!firebaseUser) return <LoginScreen onLogin={handleLogin} authError={authError} />;
-  if (!currentUser) {
-    return (
-       <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4 text-center">
-         <div className="bg-white p-8 rounded-xl shadow-lg border-t-8 border-red-600 max-w-md w-full">
-           <Icon name="alert" className="w-16 h-16 text-red-600 mx-auto mb-4" />
-           <h2 className="text-xl font-black text-red-700 mb-2">Usuario no autorizado</h2>
-           <p className="mb-6 text-sm text-gray-600 font-medium">El correo <span className="font-bold text-[#165399]">{firebaseUser.email}</span> no está vinculado a ningún profesional en la base de datos de esta plataforma.</p>
-           <button onClick={handleLogout} className="w-full bg-[#165399] hover:bg-[#114078] text-white font-bold px-4 py-3 rounded-lg transition-colors">Cerrar Sesión e intentar de nuevo</button>
-         </div>
-       </div>
-    );
-  }
-
-  const handleUpdateConfig = async (newConfig) => { if (db) { try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'emssanar_settings', 'main_config'), newConfig); } catch (e) {} } };
-  const handleAddTask = async (t) => { if (db) await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'emssanar_tasks', t.id), t); };
-  const handleUpdateTaskStatus = async (id, s) => { if (db) await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'emssanar_tasks', id), { status: s }); };
-  const handleUpdateTaskData = async (id, d) => { if (db) await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'emssanar_tasks', id), d); };
-  const handleAddComment = async (id, c) => { if (db) { const task = tasks.find(t => t.id === id); if (task) await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'emssanar_tasks', id), { comments: [...(task.comments || []), c] }); } };
-  const handleDeleteTask = async (id) => { if (db) { try { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'emssanar_tasks', id)); } catch (error) {} } };
-  const handleSaveMeasurement = async (measurementData) => { if (db) { try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'emssanar_measurements', measurementData.id), measurementData); } catch (e) {} } };
-  const handleImportTasks = async (importedTasks) => { if (!Array.isArray(importedTasks) || !db) return; for (const t of importedTasks) { try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'emssanar_tasks', t.id), t); } catch (e) {} } };
-  const handleClearAllTasks = async () => { if (!db) return; for (const t of tasks) { try { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'emssanar_tasks', t.id)); } catch (e) {} } };
-
-  return (
-    <div className="min-h-screen bg-gray-100 text-gray-800 font-sans">
-      <header className="bg-[#165399] text-white shadow-lg sticky top-0 z-40 border-b-4 border-[#8CC63F]">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
-          <div>
-            <h1 className="text-xl font-black tracking-tight leading-tight uppercase">Sistema de Gestión de Entregables</h1>
-            <h2 className="text-xs font-bold text-[#8CC63F] uppercase tracking-widest">Planeación y Calidad</h2>
-          </div>
-          
-          {(currentUser.role === 'Coordinador' || currentUser.role === 'Jefe') && (
-            <div className="flex bg-[#114078] p-1 rounded-lg border border-blue-800 shadow-inner overflow-hidden mx-auto md:mx-0">
-              <button onClick={() => setDashboardMode('TRACKING')} className={`px-4 py-1.5 text-sm font-bold transition-colors ${dashboardMode === 'TRACKING' ? 'bg-[#8CC63F] text-white rounded' : 'text-blue-200 hover:text-white'}`}>Seguimiento</button>
-              <button onClick={() => setDashboardMode('ADMIN')} className={`px-4 py-1.5 text-sm font-bold flex items-center gap-1 transition-colors ${dashboardMode === 'ADMIN' ? 'bg-[#8CC63F] text-white rounded' : 'text-blue-200 hover:text-white'}`}>
-                <Icon name="settings" className="w-4 h-4"/> Configuración
-              </button>
-            </div>
-          )}
-
-          <div className="flex items-center gap-4 bg-[#114078] px-4 py-2 rounded-xl shadow-inner border border-blue-800">
-            <div className="text-right hidden sm:block">
-              <p className="text-sm font-bold">{currentUser.name}</p>
-              <p className="text-[10px] text-[#AAB4C2] font-black uppercase tracking-wider">{currentUser.role}</p>
-            </div>
-            <div className="w-10 h-10 bg-[#8CC63F] rounded-full flex items-center justify-center text-white font-black text-lg shadow-md border-2 border-white">
-              {currentUser.name.charAt(0)}
-            </div>
-            <button onClick={handleLogout} className="ml-2 text-xs bg-red-600 hover:bg-red-700 px-3 py-2 rounded-lg font-bold transition-colors shadow-sm">
-              Salir
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <main className="max-w-7xl mx-auto px-4 py-8">
-        {dashboardMode === 'ADMIN' ? (
-          <AdminPanel config={appConfig} onUpdateConfig={handleUpdateConfig} tasks={tasks} currentUser={currentUser} onUpdateTaskData={handleUpdateTaskData} onDeleteTask={handleDeleteTask} onImportTasks={handleImportTasks} onClearAllTasks={handleClearAllTasks} />
-        ) : (
-          <>
-            <div className="mb-6 flex gap-4">
-              <div className="flex-1 bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex items-center gap-4">
-                <div className="p-3 bg-blue-50 rounded-lg border border-blue-100"><Icon name="user" className="w-6 h-6 text-[#165399]" /></div>
-                <div><p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Perfil Actual</p><p className="text-lg font-black text-[#165399]">{currentUser.role}</p></div>
-              </div>
-              {currentUser.canReview && (
-                <div className="flex-1 bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex items-center gap-4">
-                  <div className="p-3 bg-green-50 rounded-lg border border-green-100"><Icon name="clock" className="w-6 h-6 text-[#8CC63F]" /></div>
-                  <div><p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Pendientes de Revisión</p><p className="text-lg font-black text-[#8CC63F]">{pendingReviewsCount} Entregables</p></div>
-                </div>
-              )}
-            </div>
-
-            {currentUser.canReview ? (
-              <ReviewerDashboard user={currentUser} tasks={tasks} categories={appConfig.categories || DEFAULT_CATEGORIES} config={appConfig} employees={appConfig.employees} measurements={measurements} onAddTask={handleAddTask} onUpdateTaskStatus={handleUpdateTaskStatus} onAddComment={handleAddComment} onUpdateTaskData={handleUpdateTaskData} onDeleteTask={handleDeleteTask} onSaveMeasurement={handleSaveMeasurement} />
-            ) : (
-              <JuniorDashboard user={currentUser} tasks={tasks} categories={appConfig.categories || DEFAULT_CATEGORIES} onAddTask={handleAddTask} onUpdateTaskStatus={handleUpdateTaskStatus} onUpdateTaskData={handleUpdateTaskData} onDeleteTask={handleDeleteTask} />
-            )}
-          </>
-        )}
-      </main>
     </div>
   );
 };
