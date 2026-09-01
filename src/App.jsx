@@ -63,13 +63,13 @@ const STATUS_HEX_COLORS = {
   [STATUS.SOLICITUD_CONTINUIDAD]: '#9333EA',
   [STATUS.CUMPLIDO]: '#8CC63F',
   [STATUS.CON_OBSERVACIONES]: '#EAB308',
-  [STATUS.NO_CUMPLIDO]: '#991B1B', 
+  [STATUS.NO_CUMPLIDO]: '#f44236', 
   [STATUS.CONTINUADO]: '#F97316',
   [STATUS.NO_REPORTADO]: '#DC2626',
 };
 
 // ==========================================
-// LISTA OFICIAL DE EMPLEADOS (CORREOS REALES)
+// CORREOS OFICIALES
 // ==========================================
 const DEFAULT_EMPLOYEES = [
   { id: '1085253822', email: 'johanavallejo@emssanareps.co', name: 'Jhoana Consuelo Vallejo Ramos', role: 'Jefe', canReview: true },
@@ -197,7 +197,7 @@ const Icon = ({ name, className }) => {
     alert: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>,
     download: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>,
     upload: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>,
-    settings: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>,
+    settings: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>,
     target: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>,
     activity: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
   };
@@ -282,16 +282,10 @@ const DashboardMetrics = ({ tasks, employees }) => {
   const noCumplidos = tasks?.filter(t => t.status === STATUS.NO_CUMPLIDO || t.status === STATUS.NO_REPORTADO).length || 0;
   const enRevisionYOtros = total - cumplidos - noCumplidos;
 
-  const groupedStatusCounts = {
-    'Cumplidos': cumplidos,
-    'En Revisión / Pendientes': enRevisionYOtros,
-    'No Cumplido': noCumplidos
-  };
-
   const pieData = [
-    { name: 'Cumplidos', value: groupedStatusCounts['Cumplidos'], fill: STATUS_HEX_COLORS[STATUS.CUMPLIDO] },
-    { name: 'En Revisión / Pendientes', value: groupedStatusCounts['En Revisión / Pendientes'], fill: STATUS_HEX_COLORS[STATUS.EN_REVISION] },
-    { name: 'No Cumplido', value: groupedStatusCounts['No Cumplido'], fill: STATUS_HEX_COLORS[STATUS.NO_CUMPLIDO] }
+    { name: 'Cumplidos', value: cumplidos, fill: STATUS_HEX_COLORS[STATUS.CUMPLIDO] },
+    { name: 'En Revisión / Pendientes', value: enRevisionYOtros, fill: STATUS_HEX_COLORS[STATUS.EN_REVISION] },
+    { name: 'No Cumplido', value: noCumplidos, fill: STATUS_HEX_COLORS[STATUS.NO_CUMPLIDO] }
   ].filter(item => item.value > 0);
 
   const assigneeStats = tasks?.reduce((acc, task) => {
@@ -319,7 +313,7 @@ const DashboardMetrics = ({ tasks, employees }) => {
 
   const barData = Object.values(assigneeStats).sort((a, b) => b.total - a.total);
 
-  const renderPieLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index, value }) => {
+  const renderPieLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, value }) => {
     if (value === 0) return null;
     const radius = innerRadius + (outerRadius - innerRadius) * 0.6;
     const x = cx + radius * Math.cos(-midAngle * Math.PI / 180);
@@ -397,6 +391,121 @@ const DashboardMetrics = ({ tasks, employees }) => {
           </div>
         </div>
       </div>
+    </div>
+  );
+};
+
+/* --- MÓDULO NUEVO: GESTIÓN DE INDICADORES EN SUPERVISOR --- */
+const IndicatorsManager = ({ user, tasks, employees, config, measurements, onSaveMeasurement }) => {
+  const currentMonthValue = new Date().toISOString().slice(0,7); 
+  const [selectedPeriod, setSelectedPeriod] = useState(currentMonthValue);
+
+  const canSeeAll = user.role === 'Jefe' || user.role === 'Coordinador';
+  const myTeamMembers = canSeeAll 
+     ? (employees || []).filter(e => e.role === 'Junior' || e.role === 'Aprendiz') 
+     : (employees || []).filter(emp => emp.reviewerId === user.id && (emp.role === 'Junior' || emp.role === 'Aprendiz'));
+
+  const indicators = config?.indicators || DEFAULT_INDICATORS;
+
+  const handleValChange = (empId, indId, field, value) => {
+     const numVal = parseInt(value, 10);
+     if (isNaN(numVal) && value !== '') return;
+     const measId = `${indId}_${empId}_${selectedPeriod}`;
+     const existing = (measurements || []).find(m => m.id === measId) || { id: measId, indicatorId: indId, assigneeId: empId, period: selectedPeriod, numerator: 0, denominator: 0 };
+     const updated = { ...existing, [field]: value === '' ? 0 : numVal };
+     onSaveMeasurement(updated);
+  };
+
+  return (
+    <div className="space-y-6">
+       <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 border-t-8 border-t-[#8CC63F]">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 border-b border-gray-100 pb-4">
+             <div>
+               <h2 className="text-xl font-black text-[#8CC63F] flex items-center gap-2"><Icon name="target" className="w-6 h-6"/> Medición de Indicadores de Gestión</h2>
+               <p className="text-sm text-gray-500 font-medium">Evalúe el desempeño mensual de los miembros de su equipo.</p>
+             </div>
+             <div className="mt-4 md:mt-0 flex items-center gap-3 bg-gray-50 p-2 rounded-lg border border-gray-200">
+               <label className="text-sm font-bold text-[#165399]">Mes a evaluar:</label>
+               <input type="month" value={selectedPeriod} onChange={(e) => setSelectedPeriod(e.target.value)} className="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#8CC63F] outline-none text-sm font-bold text-gray-700"/>
+             </div>
+          </div>
+
+          <div className="space-y-8">
+             {myTeamMembers.length === 0 ? (
+                <p className="text-center text-gray-500 py-10 font-bold">No tiene profesionales asignados para evaluar.</p>
+             ) : (
+                myTeamMembers.map(emp => {
+                   return (
+                      <div key={emp.id} className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                         <div className="bg-gray-50 px-4 py-3 border-b border-gray-200 flex items-center gap-3">
+                            <div className="w-8 h-8 bg-[#165399] rounded-full flex items-center justify-center text-white font-black text-xs shadow-sm">{emp.name.charAt(0)}</div>
+                            <div>
+                               <h3 className="font-bold text-[#165399] text-base leading-tight">{emp.name}</h3>
+                               <span className="text-[10px] text-gray-500 uppercase tracking-widest font-black">C.C. {emp.id}</span>
+                            </div>
+                         </div>
+                         <div className="p-4 overflow-x-auto">
+                            <table className="min-w-full divide-y divide-gray-200">
+                               <thead>
+                                  <tr>
+                                     <th className="px-2 py-2 text-left text-xs font-bold text-gray-500 uppercase">Indicador</th>
+                                     <th className="px-2 py-2 text-center text-xs font-bold text-[#165399] uppercase bg-blue-50 rounded-tl-md">Numerador</th>
+                                     <th className="px-2 py-2 text-center text-xs font-bold text-[#165399] uppercase bg-blue-50">Denominador</th>
+                                     <th className="px-2 py-2 text-center text-xs font-bold text-[#8CC63F] uppercase bg-green-50 rounded-tr-md">Resultado</th>
+                                     <th className="px-2 py-2 text-center text-xs font-bold text-gray-500 uppercase">Meta</th>
+                                  </tr>
+                               </thead>
+                               <tbody className="divide-y divide-gray-100">
+                                  {indicators.map(ind => {
+                                     let num = 0; let den = 0; let isCalc = ind.isAuto;
+
+                                     if (ind.isAuto) {
+                                        const tasksInMonth = (tasks || []).filter(t => t.assigneeId === emp.id && getTaskMonthYear(t.assignedWeek) === selectedPeriod);
+                                        den = tasksInMonth.length;
+                                        num = tasksInMonth.filter(t => t.status === STATUS.CUMPLIDO).length;
+                                     } else {
+                                        const measId = `${ind.id}_${emp.id}_${selectedPeriod}`;
+                                        const rec = (measurements || []).find(m => m.id === measId);
+                                        if (rec) { num = rec.numerator || 0; den = rec.denominator || 0; }
+                                     }
+
+                                     const result = den === 0 ? 0 : Math.round((num / den) * 100);
+                                     const cumpleMeta = result >= ind.meta;
+
+                                     return (
+                                        <tr key={ind.id} className="hover:bg-gray-50">
+                                           <td className="px-2 py-3">
+                                              <p className="text-sm font-bold text-gray-800">{ind.name}</p>
+                                              <p className="text-[9px] text-gray-400 font-mono mt-0.5" title={ind.formula}>Fórmula: {ind.formula}</p>
+                                           </td>
+                                           <td className="px-2 py-3 text-center bg-blue-50/30">
+                                              {isCalc ? <span className="font-bold text-[#165399] text-sm">{num}</span> : 
+                                                 <input type="number" min="0" value={num || ''} onChange={(e) => handleValChange(emp.id, ind.id, 'numerator', e.target.value)} className="w-16 px-2 py-1 text-center border border-blue-300 rounded text-sm font-bold text-[#165399] focus:ring-1 focus:ring-[#165399] outline-none" title={ind.numVar}/>
+                                              }
+                                           </td>
+                                           <td className="px-2 py-3 text-center bg-blue-50/30">
+                                              {isCalc ? <span className="font-bold text-[#165399] text-sm">{den}</span> : 
+                                                 <input type="number" min="0" value={den || ''} onChange={(e) => handleValChange(emp.id, ind.id, 'denominator', e.target.value)} className="w-16 px-2 py-1 text-center border border-blue-300 rounded text-sm font-bold text-[#165399] focus:ring-1 focus:ring-[#165399] outline-none" title={ind.denVar}/>
+                                              }
+                                           </td>
+                                           <td className="px-2 py-3 text-center bg-green-50/30">
+                                              <span className={`text-base font-black px-2 py-1 rounded ${cumpleMeta ? 'text-[#8CC63F] bg-[#f3f9eb]' : 'text-orange-500 bg-orange-50'}`}>{result}%</span>
+                                           </td>
+                                           <td className="px-2 py-3 text-center">
+                                              <span className="text-xs font-black text-gray-500">{ind.meta}%</span>
+                                           </td>
+                                        </tr>
+                                     );
+                                  })}
+                               </tbody>
+                            </table>
+                         </div>
+                      </div>
+                   )
+                })
+             )}
+          </div>
+       </div>
     </div>
   );
 };
@@ -501,6 +610,13 @@ const AdminPanel = ({ config, onUpdateConfig, tasks, currentUser, onUpdateTaskDa
     reader.readAsText(file); e.target.value = null;
   };
 
+  const saveDbTaskEdit = (e) => {
+    e.preventDefault();
+    onUpdateTaskData(dbTaskEdit.id, dbTaskEdit);
+    setEditDbModal(false);
+    setDbTaskEdit(null);
+  };
+
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
@@ -547,15 +663,15 @@ const AdminPanel = ({ config, onUpdateConfig, tasks, currentUser, onUpdateTaskDa
               <div className="border border-gray-200 rounded-lg overflow-hidden">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
-                    <tr><th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Cédula</th><th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Nombre</th><th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Correo</th><th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Rol</th><th className="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase">Acciones</th></tr>
+                    <tr><th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Cédula</th><th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Nombre</th><th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Correo (Firebase Auth)</th><th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Rol</th><th className="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase">Acciones</th></tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {(config.employees || []).map(emp => (
                       <tr key={emp.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{emp.id}</td><td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{emp.name}</td><td className="px-6 py-4 whitespace-nowrap text-sm text-[#165399] font-bold">{emp.email || 'SIN CORREO'}</td><td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700"><span className="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs font-bold">{emp.role}</span></td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          <button onClick={() => openEditUser(emp)} className="text-[#165399] hover:text-[#114078] bg-blue-50 p-2 rounded-lg mr-2"><Icon name="edit" className="w-4 h-4" /></button>
-                          <button onClick={() => handleDeleteUser(emp.id)} className="text-red-600 hover:text-red-900 bg-red-50 p-2 rounded-lg"><Icon name="trash" className="w-4 h-4" /></button>
+                          <button onClick={() => openEditUser(emp)} className="text-[#165399] hover:text-[#114078] bg-blue-50 p-2 rounded-lg mr-2" title="Editar"><Icon name="edit" className="w-4 h-4" /></button>
+                          <button onClick={() => handleDeleteUser(emp.id)} className="text-red-600 hover:text-red-900 bg-red-50 p-2 rounded-lg" title="Eliminar"><Icon name="trash" className="w-4 h-4" /></button>
                         </td>
                       </tr>
                     ))}
@@ -654,8 +770,8 @@ const AdminPanel = ({ config, onUpdateConfig, tasks, currentUser, onUpdateTaskDa
                         <td className="px-4 py-2 text-xs text-gray-700">{task.assignedWeek}</td>
                         <td className="px-4 py-2"><Badge status={task.status} /></td>
                         <td className="px-4 py-2 text-right text-xs font-medium">
-                          <button onClick={() => { setDbTaskEdit(task); setEditDbModal(true); }} className="text-[#165399] hover:text-[#114078] bg-blue-50 p-1.5 rounded mr-2"><Icon name="edit" className="w-4 h-4" /></button>
-                          <button onClick={() => { if(window.confirm('¿Borrar registro?')) onDeleteTask(task.id); }} className="text-red-600 hover:text-red-900 bg-red-50 p-1.5 rounded"><Icon name="trash" className="w-4 h-4" /></button>
+                          <button onClick={() => { setDbTaskEdit(task); setEditDbModal(true); }} className="text-[#165399] hover:text-[#114078] bg-blue-50 p-1.5 rounded mr-2" title="Edición Cruda"><Icon name="edit" className="w-4 h-4" /></button>
+                          <button onClick={() => { if(window.confirm('¿Borrar registro?')) onDeleteTask(task.id); }} className="text-red-600 hover:text-red-900 bg-red-50 p-1.5 rounded" title="Forzar Eliminado"><Icon name="trash" className="w-4 h-4" /></button>
                         </td>
                       </tr>
                     ))}
@@ -701,7 +817,7 @@ const AdminPanel = ({ config, onUpdateConfig, tasks, currentUser, onUpdateTaskDa
             <div className="p-3 bg-orange-50 border border-orange-200 rounded text-xs text-orange-800 font-bold mb-4">⚠️ ATENCIÓN: Modificar estados o IDs crudos puede romper la lógica.</div>
             <div className="grid grid-cols-2 gap-4">
               <div><label className="block text-xs font-bold text-gray-700 mb-1">ID</label><input type="text" value={dbTaskEdit.id} readOnly className="w-full px-3 py-1 border bg-gray-100 text-xs" /></div>
-              <div><label className="block text-xs font-bold text-gray-700 mb-1">Cédula (assigneeId)</label><input type="text" value={dbTaskEdit.assigneeId} onChange={e => setDbTaskEdit({...dbTaskEdit, assigneeId: e.target.value})} className="w-full px-3 py-1 border text-xs" /></div>
+              <div><label className="block text-xs font-bold text-gray-700 mb-1">Cédula</label><input type="text" value={dbTaskEdit.assigneeId} onChange={e => setDbTaskEdit({...dbTaskEdit, assigneeId: e.target.value})} className="w-full px-3 py-1 border text-xs" /></div>
               <div className="col-span-2"><label className="block text-xs font-bold text-gray-700 mb-1">Título</label><input type="text" value={dbTaskEdit.title} onChange={e => setDbTaskEdit({...dbTaskEdit, title: e.target.value})} className="w-full px-3 py-1 border text-xs" /></div>
               <div><label className="block text-xs font-bold text-gray-700 mb-1">Semana</label><input type="text" value={dbTaskEdit.assignedWeek} onChange={e => setDbTaskEdit({...dbTaskEdit, assignedWeek: e.target.value})} className="w-full px-3 py-1 border text-xs" /></div>
               <div><label className="block text-xs font-bold text-gray-700 mb-1">Estado</label><select value={dbTaskEdit.status} onChange={e => setDbTaskEdit({...dbTaskEdit, status: e.target.value})} className="w-full px-3 py-1 border text-xs">{Object.values(STATUS).map(s => <option key={s} value={s}>{s}</option>)}</select></div>
@@ -711,7 +827,6 @@ const AdminPanel = ({ config, onUpdateConfig, tasks, currentUser, onUpdateTaskDa
         )}
       </Modal>
 
-      {/* Modal Nuevo Indicador */}
       <Modal isOpen={isIndicatorModalOpen} onClose={() => setIsIndicatorModalOpen(false)} title="Crear Nuevo Indicador (KPI)">
         <form onSubmit={handleAddIndicator} className="space-y-4">
           <div className="p-3 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800 font-bold mb-4">Los indicadores se calculan como porcentaje: <code>(Numerador / Denominador) * 100</code></div>
@@ -883,7 +998,7 @@ const JuniorDashboard = ({ user, tasks, categories, onAddTask, onUpdateTaskStatu
       </Modal>
 
       <Modal isOpen={isRescheduleModalOpen} onClose={() => setIsRescheduleModalOpen(false)} title="Reprogramar">
-        <form onSubmit={handleReschedule} className="space-y-4">
+        <form onSubmit={(e) => { e.preventDefault(); onUpdateTaskData(activeTask.id, { assignedWeek: rescheduleWeek }); setIsRescheduleModalOpen(false); setActiveTask(null); }} className="space-y-4">
           <div><label className="block text-sm font-bold text-[#165399] mb-1">Nueva semana <span className="text-red-500">*</span></label><select required value={rescheduleWeek} onChange={e => setRescheduleWeek(e.target.value)} className="w-full px-3 py-2 border rounded-lg"><option value="">Seleccione...</option>{upcomingWeeks.map(w => <option key={w} value={w}>{w}</option>)}</select></div>
           <div className="pt-4 flex justify-end gap-2"><button type="button" onClick={() => setIsRescheduleModalOpen(false)} className="px-4 py-2 bg-gray-100 rounded-lg font-bold">Cancelar</button><button type="submit" className="px-4 py-2 bg-[#165399] text-white rounded-lg font-bold">Reprogramar</button></div>
         </form>
@@ -892,7 +1007,7 @@ const JuniorDashboard = ({ user, tasks, categories, onAddTask, onUpdateTaskStatu
   );
 };
 
-/* --- MÓDULO NUEVO: GESTIÓN DE INDICADORES EN SUPERVISOR --- */
+/* --- MÓDULO SUPERVISOR: GESTIÓN DE INDICADORES --- */
 const IndicatorsManager = ({ user, tasks, employees, config, measurements, onSaveMeasurement }) => {
   const currentMonthValue = new Date().toISOString().slice(0,7); 
   const [selectedPeriod, setSelectedPeriod] = useState(currentMonthValue);
@@ -919,7 +1034,7 @@ const IndicatorsManager = ({ user, tasks, employees, config, measurements, onSav
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 border-b border-gray-100 pb-4">
              <div>
                <h2 className="text-xl font-black text-[#8CC63F] flex items-center gap-2"><Icon name="target" className="w-6 h-6"/> Medición de Indicadores de Gestión</h2>
-               <p className="text-sm text-gray-500 font-medium">Evalúe el desempeño mensual de los miembros de su equipo.</p>
+               <p className="text-sm text-gray-500 font-medium">Evalúe el desempeño mensual de su equipo.</p>
              </div>
              <div className="mt-4 md:mt-0 flex items-center gap-3 bg-gray-50 p-2 rounded-lg border border-gray-200">
                <label className="text-sm font-bold text-[#165399]">Mes a evaluar:</label>
@@ -929,7 +1044,7 @@ const IndicatorsManager = ({ user, tasks, employees, config, measurements, onSav
 
           <div className="space-y-8">
              {myTeamMembers.length === 0 ? (
-                <p className="text-center text-gray-500 py-10 font-bold">No tiene profesionales Junior asignados para evaluar.</p>
+                <p className="text-center text-gray-500 py-10 font-bold">No tiene profesionales asignados para evaluar.</p>
              ) : (
                 myTeamMembers.map(emp => {
                    return (
